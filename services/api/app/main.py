@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import health, auth, documents, search, chat, conversations, approvals
+from .routers import health, auth, documents, search, chat, conversations, approvals, credits, settings
 from .db.session import AsyncSessionLocal, engine
 from .db.models import Base, Tenant, User
 from .core.security import get_password_hash
@@ -12,6 +12,7 @@ from .events.consumer import consume_ingestion_events
 
 from contextlib import asynccontextmanager
 import asyncio
+import logging
 from sqlalchemy import select
 from prometheus_fastapi_instrumentator import Instrumentator
 from asgi_correlation_id import CorrelationIdMiddleware
@@ -19,6 +20,8 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from .core.rate_limit import limiter
+
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -30,22 +33,20 @@ async def lifespan(app: FastAPI):
     try:
         init_minio()
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).warning(f"MinIO init failed (non-fatal): {e}")
+        logger.warning(f"MinIO init failed (non-fatal): {e}")
     
     # Initialize Qdrant collection
     try:
         await init_qdrant()
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).warning(f"Qdrant init failed (non-fatal): {e}")
+        logger.warning(f"Qdrant init failed (non-fatal): {e}")
     
     # Start Redis consumer as background task
     consumer_task = asyncio.create_task(consume_ingestion_events())
     
     # Seed default admin user
     async with AsyncSessionLocal() as session:
-        settings = get_settings()
+        app_settings = get_settings()
         result = await session.execute(select(Tenant).where(Tenant.name == "admin"))
         tenant = result.scalars().first()
         if not tenant:
@@ -59,17 +60,51 @@ async def lifespan(app: FastAPI):
             user = User(
                 tenant_id=tenant.id,
                 email="admin@co-op.local",
-                hashed_password=get_password_hash(settings.DB_PASS)
+                hashed_password=get_password_hash(app_settings.DB_PASS)
             )
             session.add(user)
             await session.commit()
+
+    # --- Stage 2: Hardware detection (non-blocking) ---
+    async def _detect_hardware():
+        try:
+            from .core.hardware_detector import detect_and_store_hardware
+            await detect_and_store_hardware()
+        except Exception as e:
+            logger.warning(f"Hardware detection failed (non-fatal): {e}")
+
+    hardware_task = asyncio.create_task(_detect_hardware())
+
+    # --- Stage 2: Telegram bot (if configured) ---
+    telegram_started = False
+    try:
+        app_settings = get_settings()
+        if app_settings.TELEGRAM_BOT_TOKEN:
+            from .communication.telegram import start_telegram_bot
+            await start_telegram_bot()
+            telegram_started = True
+        else:
+            logger.info("TELEGRAM_BOT_TOKEN not set — Telegram bot disabled.")
+    except Exception as e:
+        logger.warning(f"Telegram bot startup failed (non-fatal): {e}")
+
     yield
+
     # Shutdown
     consumer_task.cancel()
     try:
         await consumer_task
     except asyncio.CancelledError:
         pass
+
+    # Stop Telegram bot
+    if telegram_started:
+        try:
+            from .communication.telegram import stop_telegram_bot
+            await stop_telegram_bot()
+        except Exception as e:
+            logger.warning(f"Telegram bot shutdown error: {e}")
+
     await engine.dispose()
 
 setup_logging()
@@ -77,7 +112,7 @@ setup_logging()
 app = FastAPI(
     title="Co-Op API",
     description="Main Control Plane for Co-Op AI OS",
-    version="0.1.0",
+    version="0.2.0",
     lifespan=lifespan
 )
 
@@ -106,3 +141,6 @@ app.include_router(search.router)
 app.include_router(chat.router)
 app.include_router(conversations.router)
 app.include_router(approvals.router)
+# Stage 2 routers
+app.include_router(credits.router)
+app.include_router(settings.router)

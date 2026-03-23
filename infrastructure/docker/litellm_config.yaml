@@ -1,5 +1,54 @@
+# Co-Op Stage 2 — LiteLLM Model Routing & Budget Config
+# Docs: https://docs.litellm.ai/docs/proxy/configs
+
 model_list:
-  - model_name: ollama/llama3.2:3b
+  # --- Tier 1: Simple tasks (fast, cheap) ---
+  - model_name: simple
     litellm_params:
       model: ollama/llama3.2:3b
       api_base: http://ollama:11434
+      max_tokens: 1024
+      temperature: 0.3
+
+  # --- Tier 2: Standard tasks (balanced) ---
+  - model_name: standard
+    litellm_params:
+      model: ollama/llama3.1:8b
+      api_base: http://ollama:11434
+      max_tokens: 4096
+      temperature: 0.7
+
+  # --- Tier 3: Complex tasks (cloud fallback) ---
+  - model_name: complex
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+      max_tokens: 4096
+      temperature: 0.7
+
+  - model_name: complex
+    litellm_params:
+      model: gemini/gemini-1.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+      max_tokens: 4096
+      temperature: 0.7
+
+  # --- Direct Ollama access (for generate_answer) ---
+  - model_name: ollama-chat
+    litellm_params:
+      model: ollama/llama3.1:8b
+      api_base: http://ollama:11434
+      max_tokens: 4096
+      temperature: 0.7
+
+general_settings:
+  master_key: sk-coop-litellm-internal
+
+litellm_settings:
+  drop_params: true
+  set_verbose: false
+  num_retries: 2
+  request_timeout: 120
+  # Budget enforcement per user/agent — tokens per day
+  max_budget: 5.0          # $5/day overall cap (cloud models only)
+  budget_duration: 1d

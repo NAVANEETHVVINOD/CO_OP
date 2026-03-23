@@ -22,6 +22,17 @@ def mock_from_url(*args, **kwargs):
 redis.asyncio.from_url = mock_from_url
 redis.asyncio.Redis.from_url = mock_from_url
 
+import os
+os.environ["DATABASE_URL"] = "postgresql+asyncpg://test:test@localhost/test"
+os.environ["REDIS_URL"] = "redis://localhost:6379"
+os.environ["QDRANT_URL"] = "http://localhost:6333"
+os.environ["MINIO_URL"] = "localhost:9000"
+os.environ["MINIO_ROOT_USER"] = "minio"
+os.environ["MINIO_ROOT_PASSWORD"] = "minio123"
+os.environ["SECRET_KEY"] = "super-secret"
+os.environ["DB_PASS"] = "test"
+os.environ["LITELLM_URL"] = "http://localhost:4000"
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport

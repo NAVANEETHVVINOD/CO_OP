@@ -22,6 +22,7 @@ class Tenant(Base):
     documents: Mapped[List["Document"]] = relationship(back_populates="tenant")
     audit_events: Mapped[List["AuditEvent"]] = relationship(back_populates="tenant")
     cost_events: Mapped[List["CostEvent"]] = relationship(back_populates="tenant")
+    leads: Mapped[List["Lead"]] = relationship(back_populates="tenant")
 
 class User(Base):
     __tablename__ = "users"
@@ -133,3 +134,31 @@ class Message(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     
     conversation: Mapped["Conversation"] = relationship(back_populates="messages")
+
+
+# ─── Stage 2 Models ────────────────────────────────────────────────
+
+class Lead(Base):
+    """Upwork/freelance job leads found by Lead Scout agent."""
+    __tablename__ = "leads"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"))
+    source: Mapped[str] = mapped_column(String(50), default="upwork")  # upwork, freelancer, etc.
+    title: Mapped[str] = mapped_column(String(500))
+    url: Mapped[str] = mapped_column(String(1000), default="")
+    description: Mapped[str] = mapped_column(Text, default="")
+    score: Mapped[float] = mapped_column(Float, default=0.0)  # 0-100 match score
+    status: Mapped[str] = mapped_column(String(50), default="new")  # new, reviewed, applied, rejected
+    found_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    tenant: Mapped["Tenant"] = relationship(back_populates="leads")
+
+
+class SystemSetting(Base):
+    """Key-value store for system settings (hardware tier, feature flags, etc.)."""
+    __tablename__ = "system_settings"
+
+    key: Mapped[str] = mapped_column(String(255), primary_key=True)
+    value: Mapped[Dict[str, Any]] = mapped_column(JSON().with_variant(JSONB, "postgresql"), default=dict)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)

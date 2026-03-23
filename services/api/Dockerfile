@@ -1,10 +1,11 @@
 FROM python:3.12-slim
 
-# Install system dependencies
+# Install system dependencies (including supervisor for multi-process)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     procps \
     libpq-dev \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv
@@ -36,6 +37,11 @@ RUN uv pip install .
 # Copy application code
 COPY app ./app
 
+# Copy process management config
+COPY supervisord.conf /app/supervisord.conf
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 # Expose port
 EXPOSE 8000
 
@@ -43,5 +49,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --retries=5 --start-period=60s \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Run Uvicorn worker
-CMD ["/app/.venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run supervisord (manages uvicorn + arq worker)
+CMD ["/app/entrypoint.sh"]

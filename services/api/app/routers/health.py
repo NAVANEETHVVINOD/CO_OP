@@ -51,13 +51,51 @@ async def _check_minio() -> str:
         return "error"
 
 
+# ─── Stage 2 health checks ─────────────────────────────────────────
+
+async def _check_ollama() -> str:
+    try:
+        import httpx
+        async with httpx.AsyncClient() as client:
+            resp = await client.get("http://ollama:11434/api/tags", timeout=5.0)
+            return "ok" if resp.status_code == 200 else "error"
+    except Exception as e:
+        logger.error(f"Ollama health check failed: {e}")
+        return "error"
+
+
+async def _check_litellm() -> str:
+    try:
+        import httpx
+        from app.config import get_settings
+        settings = get_settings()
+        if not settings.LITELLM_URL:
+            return "not_configured"
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(f"{settings.LITELLM_URL}/health", timeout=5.0)
+            return "ok" if resp.status_code == 200 else "error"
+    except Exception as e:
+        logger.error(f"LiteLLM health check failed: {e}")
+        return "error"
+
+
 @router.get("/health")
 async def check_health():
     pg = await _check_postgres()
     rd = await _check_redis()
     qd = await _check_qdrant()
     mo = await _check_minio()
-    return {"status": "ok", "postgres": pg, "redis": rd, "qdrant": qd, "minio": mo}
+    ol = await _check_ollama()
+    ll = await _check_litellm()
+    return {
+        "status": "ok",
+        "postgres": pg,
+        "redis": rd,
+        "qdrant": qd,
+        "minio": mo,
+        "ollama": ol,
+        "litellm": ll,
+    }
 
 
 @router.get("/ready")
@@ -66,9 +104,20 @@ async def readiness_check():
     rd = await _check_redis()
     qd = await _check_qdrant()
     mo = await _check_minio()
-    all_ok = (pg == "ok" and rd == "ok" and qd == "ok" and mo == "ok")
-    status_code = 200 if all_ok else 503
+    ol = await _check_ollama()
+    ll = await _check_litellm()
+    # Core services (Stage 1) must be healthy; Stage 2 services are optional
+    core_ok = pg == "ok" and rd == "ok" and qd == "ok" and mo == "ok"
+    status_code = 200 if core_ok else 503
     return JSONResponse(
         status_code=status_code,
-        content={"status": "ok" if all_ok else "degraded", "postgres": pg, "redis": rd, "qdrant": qd, "minio": mo}
+        content={
+            "status": "ok" if core_ok else "degraded",
+            "postgres": pg,
+            "redis": rd,
+            "qdrant": qd,
+            "minio": mo,
+            "ollama": ol,
+            "litellm": ll,
+        },
     )

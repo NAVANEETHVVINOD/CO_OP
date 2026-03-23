@@ -1,157 +1,305 @@
 # Co-Op — Autonomous Company OS
 
-> Self-hosted AI platform that runs your freelance business.
-> Agents find clients, write proposals, communicate, track projects, and invoice — with your approval on every important action.
+> AI workforce that runs your freelance business.
+> Agents find clients, write proposals, deliver work, and handle invoicing — with your approval on every important action.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
----
+If you want an AI that actually does the work, not just talk about it, this is it.
 
-## What Is Co-Op?
+**Preferred setup:** run `coop onboard` in your terminal. Co-Op Onboard guides you step‑by‑step through setting up the gateway, agents, channels, and company profile. Works on macOS, Linux, and Windows (via WSL2; strongly recommended). New install? Start here: [Getting started](#quick-start-5-minutes).
 
-Co-Op is an **autonomous company operating system** built for solo developers. Deploy it on your own machine and let AI agents handle the repetitive work of freelancing:
+## What Co-Op Does
 
-- **Find clients** — Lead Scout scans job boards every 4 hours
-- **Write proposals** — Proposal Writer crafts personalized responses using your portfolio
-- **Communicate** — Client Communicator handles professional email exchanges
-- **Track projects** — Project Tracker sets milestones and deadline alerts
-- **Create invoices** — Finance Manager generates invoices from completed milestones
-- **You stay in control** — Human approval required for every important action via Telegram or dashboard
+Co-Op is a self‑hosted AI platform that turns your laptop or server into an autonomous business operator. It connects to your messaging apps (Telegram, WhatsApp, Discord, Email), searches for clients, writes personalized proposals, delivers code or content, tracks projects, and sends invoices — all with your final approval.
 
-**Comparable to:** Microsoft Copilot + Glean AI + Zapier — but self-hosted and open source.
+- **Lead Scout** – Searches Upwork, LinkedIn, and Fiverr every few hours, scores jobs against your profile.
+- **Proposal Writer** – Drafts personalized proposals using your portfolio (RAG), self‑reviews for quality.
+- **Developer Agent** – Writes code, runs tests in a sandbox, pushes to GitHub, and opens a browser‑based VS Code for your review.
+- **Client Communicator** – Handles professional conversations, escalates complex issues to you.
+- **Project Tracker** – Sets milestones, sends deadline reminders, tracks deliverables.
+- **Finance Manager** – Creates invoices from completed milestones, tracks payments, sends reminders.
+- **System Monitor** – Watches all services, attempts self‑heal, alerts you on Telegram.
+- **Self‑Improvement Analyst** – Reviews win/loss patterns, proposes improvements, tests them in a shadow environment.
 
----
+**Everything runs locally** – no cloud dependency, no hidden fees. You stay in control.
 
-## How It Grows (4 Stages)
-
-Co-Op follows a staged architecture. Start small and add complexity only when you feel the pain.
-
-| Stage | Services | What You Get | Timeline |
-|-------|----------|-------------|----------|
-| **1** | 6 | Working chatbot with document RAG | This week |
-| **2** | 8 | Real LLM + Telegram control + Upwork reading | Month 2 |
-| **3** | 12 | Proposals submitted, client communication, first revenue | Month 3-4 |
-| **4** | Per trigger | Enterprise components when needed | Month 5+ |
-
----
-
-## Quick Start (Stage 1)
+## Quick Start (5 minutes)
 
 ### Prerequisites
-- Docker Desktop (4GB+ RAM)
-- Node.js 18+ with pnpm
+- Docker (with Docker Compose) – [Install](https://docs.docker.com/get-docker/)
+- 4 GB RAM (8 GB recommended for Stages 2+)
 - Git
 
-### 1. Clone and Configure
-
+### 1. Install Co-Op
+```bash
+curl -fsSL https://co-op.ai/install.sh | bash
+```
+*Or, if you prefer to clone:*
 ```bash
 git clone https://github.com/NAVANEETHVVINOD/CO_OP.git
 cd CO_OP
-
-# Create environment files
-cp infrastructure/docker/.env.example infrastructure/docker/.env
-cp apps/web/.env.example apps/web/.env.local
+./install.sh
 ```
 
-### 2. Start Services
-
+### 2. Run the Onboarding Wizard
 ```bash
+coop onboard --install-daemon
+```
+The wizard will:
+- Detect your hardware (CPU, RAM, GPU, KVM)
+- Ask about your business (conversation, template, or custom)
+- Connect your Telegram (or other channels)
+- Install a background service (systemd/launchd) so Co-Op runs 24/7
+
+### 3. Check the Dashboard
+After onboarding, open [http://localhost:3000](http://localhost:3000).
+Default login: `admin@co-op.local` / `testpass123` *(change after first login)*.
+
+### 4. Start Earning
+- Upload your portfolio documents → the agents will use them.
+- Lead Scout will start searching for jobs.
+- Proposals will appear in your Telegram or dashboard for approval.
+- Approved proposals are submitted automatically.
+- When you win a project, the workflow begins.
+
+## How It Grows (4 Stages)
+
+Co-Op starts with a lightweight foundation and adds features only when you need them.
+
+| Stage | Services | What You Get |
+|-------|----------|--------------|
+| 1 | 6 | RAG chatbot, document upload, dark dashboard |
+| 2 | 8 | Real LLM (Ollama), Telegram commands, Lead Scout |
+| 3 | 12 | Proposals submitted, client communication, invoicing |
+| 4 | (add when needed) | Code delivery, microVM sandbox, graph memory, temporal workflows |
+
+**Full details:** [Architecture Blueprint](docs/CO_OP_SOLO_DEVELOPER_ARCHITECTURE.md)
+
+## Architecture (10‑Layer Diagram)
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        LAYER 0: HARDWARE DETECTION                          │
+│  Detects CPU, RAM, GPU, KVM → assigns tier (Solo / Team / Agency)          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       LAYER 1: GATEWAY DASHBOARD (Next.js 15)               │
+│  Dark theme dashboard with live agent activity, approval inbox, cost       │
+│  tracker, company builder, and settings.                                   │
+│  Communication: Server‑Sent Events (SSE) for streaming chat.               │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       LAYER 2: COMMUNICATION HUB (FastAPI)                  │
+│  Adapters: Telegram Bot, Discord Bot, WhatsApp Business, Email (SMTP).    │
+│  All platforms support slash commands: /status, /pause, /panic, /approve. │
+│  Thinking display shows agent progress in real time.                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                 LAYER 3: API GATEWAY & SECURITY                             │
+│  Traefik (TLS, rate limiting), LLM Guard (prompt injection detection),     │
+│  HashiCorp Vault (secrets), OPA (action authorization - Stage 4).          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      LAYER 4: COMPANY BRAIN (FastAPI)                       │
+│  Stores business profile, goals, constraints.                               │
+│  Strategic Planner: reads KPIs, generates weekly plans.                    │
+│  Research Agent: scans GitHub, HuggingFace, arXiv for improvements.        │
+│  Agent Factory: creates new agents from natural language descriptions.     │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     LAYER 5: AGENT WORKFORCE (LangGraph)                    │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐   │
+│  │ Lead Scout  │ │Proposal     │ │Client       │ │ Developer Agent     │   │
+│  │ (searches   │ │ Writer      │ │Communicator │ │ (writes & tests     │   │
+│  │  jobs)      │ │ (drafts)    │ │ (replies)   │ │  code)              │   │
+│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────────────┘   │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐   │
+│  │Project      │ │Finance      │ │Quality      │ │ System Monitor      │   │
+│  │ Tracker     │ │ Manager     │ │ Reviewer    │ │ (health checks)     │   │
+│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     LAYER 6: WORKFLOW & TASK ENGINE                         │
+│  ARQ (async Redis queue) – handles short parallel tasks (Stage 1-3).       │
+│  Celery / Temporal (Stage 4) – durable multi-day workflows.                │
+│  Cron Scheduler (Celery Beat) – system monitors, morning brief, backups.   │
+│  Shadow Environment – isolated test stack for safe self‑improvement.       │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     LAYER 7: INTERNET & TOOL LAYER                          │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                      Tool Router (FastAPI)                          │   │
+│  │  POST /tools/execute → checks OPA → selects executor → audit        │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│       │                 │                 │                 │               │
+│  ┌────▼────┐      ┌────▼────┐      ┌────▼────┐      ┌────▼────┐           │
+│  │Browser‑ │      │Composio │      │ micro‑  │      │ GitHub  │           │
+│  │ less    │      │ MCP     │      │ sandbox │      │ API     │           │
+│  │ (web    │      │ (500+   │      │ (code   │      │ (repos, │           │
+│  │automation)│     │integrat.)│      │execution)│     │ PRs)    │           │
+│  └─────────┘      └─────────┘      └─────────┘      └─────────┘           │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    LAYER 8: KNOWLEDGE & MEMORY                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐     │
+│  │  HOT     │  │  WARM    │  │  COLD    │  │KNOWLEDGE │  │ DOCUMENTS│     │
+│  │ (Redis)  │  │(Postgres)│  │ (Graphiti│  │(Qdrant)  │  │ (MinIO)  │     │
+│  │ Session  │  │ Clients, │  │ + Neo4j) │  │ Portfolio│  │Files,    │     │
+│  │ context  │  │proposals │  │Relations│  │templates │  │research  │     │
+│  │          │  │results   │  │patterns │  │research  │  │delivera‑ │     │
+│  │          │  │          │  │          │  │          │  │bles      │     │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  └──────────┘     │
+│  Memory Governor: loads only 50 most relevant facts per agent invocation.   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    LAYER 9: INFERENCE ENGINE (LiteLLM)                      │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │  Task Router:                                                        │   │
+│  │    Simple tasks (classification) → Llama 3.2 3B (local, fast)       │   │
+│  │    Standard tasks (proposals) → Llama 3.1 8B (local)                │   │
+│  │    Complex tasks → Groq / Gemini API (optional, fallback)           │   │
+│  │  Budget enforcement: per‑agent daily token limits, hard stop.        │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Key Capabilities
+
+**1. Lead Generation**
+- Lead Scout runs every 4 hours (configurable) and searches job boards (Upwork, LinkedIn, Fiverr) using Browserless or official APIs.
+- Scores each job (0‑10) based on your profile and skills.
+- Sends top matches to your Telegram with a summary.
+
+**2. Proposal Writing**
+- Proposal Writer retrieves relevant portfolio pieces from Qdrant.
+- Uses your company tone and success patterns to draft personalized proposals.
+- Self‑reviews for length, specificity, and client fit.
+- Queues proposals for your approval (Telegram or dashboard).
+
+**3. Code & Content Delivery**
+- Developer Agent can write code using Claude or GPT‑4o (external AI as tools) or local models.
+- Code is tested in a temporary sandbox (Docker, or microVM in Stage 4).
+- You review the code in a browser‑based VS Code (code‑server).
+- Once approved, it pushes to GitHub and delivers to the client.
+
+**4. Client Communication**
+- Client Communicator maintains conversation history in PostgreSQL.
+- Responds professionally, never claims to be human.
+- Escalates complaints, price negotiations, and scope changes to you.
+
+**5. Project Management**
+- Project Tracker creates milestones from the proposal.
+- Sends deadline reminders 72 hours in advance.
+- Generates weekly status reports for you to approve before sending to clients.
+
+**6. Invoicing & Payments**
+- Finance Manager creates invoices from completed milestones.
+- You review and approve → invoice is sent via email.
+- Tracks payment status, sends reminders after 7 days.
+
+**7. Self‑Improvement**
+- Self‑Improvement Analyst reviews win/loss patterns weekly.
+- Tests new prompts or strategies in a shadow environment (fake clients).
+- Proposes improvements to you with evidence from the shadow test.
+- You approve, and the system updates its own configuration.
+
+**8. Human‑in‑the‑Loop (HITL)**
+- All mutating actions (proposals, invoices, code pushes) require your explicit approval.
+- Approve via Telegram slash commands (`/approve 1 3`) or dashboard.
+- You can pause any agent or the whole system with `/pause` or `/panic`.
+
+## CLI Reference
+
+| Command | Description |
+|---------|-------------|
+| `coop onboard` | Interactive wizard (hardware detection, company creation, channel linking, daemon) |
+| `coop gateway start` | Start all Docker services |
+| `coop gateway stop` | Stop all services |
+| `coop status` | Quick overview: agents, queue, costs |
+| `coop doctor` | Full health check + security audit |
+| `coop agents list` | List all agents and their status |
+| `coop agents pause` | Pause all agents |
+| `coop approve <id>` | Approve a pending HITL action |
+| `coop panic` | Emergency stop (all agents halt) |
+| `coop backup` | Run backup now (PostgreSQL, Qdrant, MinIO) |
+
+Full CLI docs: [CLI Reference](docs/CO_OP_SOLO_TASKS_UPDATED.md) *(docs structure WIP)*
+
+## Security Defaults
+
+Co-Op connects to real messaging surfaces. Inbound messages are treated as untrusted input.
+- Telegram / WhatsApp / Discord / Email: unknown senders receive a pairing code and their message is not processed until you approve the sender.
+- Approve with: `coop pairing approve <channel> <code>`
+- To allow open DMs, set `dmPolicy="open"` in configuration *(not recommended)*.
+- Run `coop doctor` to surface risky policies.
+- All secrets are stored in HashiCorp Vault (Stage 3). By default, credentials are kept in `.env` for simplicity.
+
+## Installation Options
+
+### Docker (Recommended)
+```bash
+git clone https://github.com/NAVANEETHVVINOD/CO_OP.git
+cd CO_OP
+./install.sh
+```
+
+### From Source (Development)
+```bash
+git clone https://github.com/NAVANEETHVVINOD/CO_OP.git
+cd CO_OP
+pnpm install   # if you want to build frontend locally
 cd infrastructure/docker
 docker compose up -d
 ```
 
-### 3. Verify
-
-```bash
-# All 6 containers should be healthy
-docker compose ps
-
-# Backend health check
-curl http://localhost:8000/health
-
-# Frontend
-cd ../../apps/web
-pnpm install
-pnpm dev
-```
-
-### 4. Login
-
-Open http://localhost:3000 and login with:
-```
-Email:    admin@co-op.local
-Password: testpass123
-```
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 15, CSS Variables, Zustand, TanStack Query |
-| Backend | FastAPI, async SQLAlchemy, Alembic |
-| AI/Agents | LangGraph, LiteLLM (Ollama in Stage 2) |
-| Knowledge | Qdrant (384-dim), all-MiniLM-L6-v2 |
-| Background Tasks | ARQ (Stages 1-3), Temporal (Stage 4) |
-| Storage | PostgreSQL 16, MinIO S3, Redis |
-| Deployment | Docker Compose |
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────┐
-│         Next.js 15 Dashboard            │
-│      (Dark theme, SSE streaming)        │
-└────────────────┬────────────────────────┘
-                 │ HTTP/SSE
-┌────────────────▼────────────────────────┐
-│           FastAPI Backend               │
-│  ┌──────┐ ┌──────┐ ┌──────┐ ┌───────┐  │
-│  │ Auth │ │ Chat │ │ Docs │ │Search │  │
-│  └──┬───┘ └──┬───┘ └──┬───┘ └──┬────┘  │
-│     │     ┌──▼───────────────┐  │       │
-│     │     │ LangGraph Agent  │  │       │
-│     │     │ retrieve→rerank  │  │       │
-│     │     │ →generate        │  │       │
-│     │     └──────────────────┘  │       │
-└─────┼────────────────────────┼──┼───────┘
-      │                        │  │
-┌─────▼──┐ ┌────────┐ ┌──────▼┐ ┌▼─────┐
-│Postgres│ │ Redis  │ │Qdrant │ │MinIO │
-│  5432  │ │  6379  │ │ 6333  │ │ 9000 │
-└────────┘ └────────┘ └───────┘ └──────┘
-```
-
----
+### Windows (WSL2)
+We strongly recommend running Co-Op inside WSL2 for the best experience. Follow the [Windows guide](docs/windows-guide.md).
 
 ## Documentation
 
-| Document | Purpose |
-|----------|---------|
-| [Architecture Blueprint](docs/CO_OP_SOLO_DEVELOPER_ARCHITECTURE.md) | Full staged architecture |
-| [Task List](docs/CO_OP_SOLO_TASKS_UPDATED.md) | 83 tasks across 4 stages |
-| [Stage 1 Guide](docs/stage1_implementation.md) | Foundation setup |
-| [Stage 2 Guide](docs/stage2_implementation.md) | LLM + Telegram |
-| [Stage 3 Guide](docs/stage3_implementation.md) | Agents + Revenue |
-| [Stage 4 Guide](docs/stage4_implementation.md) | Scaling triggers |
-| [Project Reference](docs/PROJECT.md) | Master reference |
-
----
+- [Architecture Blueprint](docs/CO_OP_SOLO_DEVELOPER_ARCHITECTURE.md) – full staged architecture, hardware tiers
+- [Task List](docs/CO_OP_SOLO_TASKS_UPDATED.md) – 83 tasks across 4 stages with “Done when” conditions
+- [Stage 1 Implementation](docs/stage1_implementation.md) – foundation setup
+- [Stage 2 Implementation](docs/stage2_implementation.md) – LLM + Telegram + Lead Scout
+- [Stage 3 Implementation](docs/stage3_implementation.md) – proposals, client comms, invoicing
+- [Stage 4 Implementation](docs/stage4_implementation.md) – scaling triggers (add only when needed)
+- [Rules & Constraints](docs/rules/co-op-coding-standards.mdc) – coding standards, agent behaviour, constraints
 
 ## Contributing
 
-This project follows the solo developer philosophy documented in `docs/rules/co-op-solo-guidelines.mdc`. Before contributing:
+Co-Op follows the solo developer philosophy – start simple, add complexity only when needed. Before contributing:
+1. Read `docs/rules/co-op-solo-guidelines.mdc`
+2. Understand the 4 stages – do not add enterprise features prematurely
+3. Follow the coding standards in `docs/rules/co-op-coding-standards.mdc`
+4. Run `coop doctor` to ensure your environment is healthy
 
-1. Read `docs/PROJECT.md` — understand the project's current state
-2. Read `docs/rules/co-op-critical-constraints.mdc` — understand what's forbidden
-3. Check the stage — don't add enterprise components to earlier stages
-4. Follow coding standards in `docs/rules/co-op-coding-standards.mdc`
-
----
+Pull requests are welcome! Whether you're fixing a bug, improving documentation, or adding a new skill, please open an issue first to discuss.
 
 ## License
 
-Apache License 2.0 — See [LICENSE](LICENSE)
+Apache License 2.0 – See [LICENSE](LICENSE) file.
+
+## Acknowledgments
+- **LangGraph** for agent state machines
+- **LiteLLM** for LLM gateway
+- **Browserless** for headless Chrome
+- **OpenClaw** for inspiration on CLI onboarding

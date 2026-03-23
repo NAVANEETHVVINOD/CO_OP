@@ -56,7 +56,46 @@ services:
       timeout: 5s
       retries: 5
 
+  # --- Stage 2: LLM Infrastructure ---
 
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        reservations:
+          memory: 4G
+
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./litellm_config.yaml:/app/config.yaml
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # --- Application Services ---
 
   co-op-api:
     build:
@@ -69,6 +108,7 @@ services:
       DB_PASS: ${DB_PASS}
       REDIS_URL: redis://redis:6379
       QDRANT_URL: http://qdrant:6333
+      LITELLM_URL: http://litellm:4000
       MINIO_URL: minio:9000
       MINIO_ENDPOINT: minio:9000
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
@@ -76,6 +116,10 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       SECRET_KEY: ${SECRET_KEY}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_ADMIN_CHAT_ID: ${TELEGRAM_ADMIN_CHAT_ID:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       ENVIRONMENT: development
       PYTHONPATH: /app
     depends_on:
@@ -86,6 +130,10 @@ services:
       qdrant:
         condition: service_started
       minio:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+      litellm:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -110,3 +158,4 @@ volumes:
   redis_data:
   qdrant_data:
   minio_data:
+  ollama_data:
