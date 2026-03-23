@@ -1,0 +1,81 @@
+---
+alwaysApply: true
+---
+
+# Known Issues and Fixes — Solo Developer Edition
+
+## Stage 1 Bugs — Fix These First
+
+### BUG-001: `DB_PASS Field required` — co-op-api crash loops
+**Status:** Fix in Stage 1 (T-001)
+**Root cause:** `docker-compose.yml` missing env vars on `co-op-api` service.
+**Fix:** Add DATABASE_URL, DB_PASS, REDIS_URL, QDRANT_URL, MINIO_ENDPOINT,
+MINIO_ACCESS_KEY, MINIO_SECRET_KEY, SECRET_KEY, ENVIRONMENT, PYTHONPATH.
+
+### BUG-002: `column conversations.tenant_id does not exist`
+**Status:** Fix in Stage 1 (T-002)
+**Root cause:** Migration `14e1dfdf2a5b` not applied.
+**Fix:** `cd services/api && alembic upgrade head`
+
+### BUG-003: `python-multipart` not installed — auth endpoint fails
+**Status:** Fix in Stage 1 (T-003)
+**Root cause:** FastAPI's `OAuth2PasswordRequestForm` requires python-multipart.
+**Fix:** Add `"python-multipart>=0.0.9"` to `services/api/pyproject.toml`, rebuild.
+
+### BUG-004: Pyre2 IDE errors — NOT runtime errors
+**Status:** Optional fix (IDE only)
+**Root cause:** VS Code Pyre2 extension not pointing at correct `.venv`.
+**Fix:** Update `.vscode/settings.json` with correct interpreter path.
+**Note:** These do NOT affect runtime. The backend runs correctly inside Docker.
+
+---
+
+## How to Verify Everything Is Working
+
+Run these in order after any fix:
+
+```bash
+# 1. All containers healthy
+docker compose -f infrastructure/docker/docker-compose.yml ps
+
+# 2. Backend health
+curl http://localhost:8000/health
+
+# 3. Frontend builds
+cd apps/web && pnpm build
+
+# 4. Login works
+curl -X POST http://localhost:8000/v1/auth/token \
+  -d "username=admin@co-op.local&password=testpass123"
+
+# 5. Open browser
+# http://localhost:3000 → should redirect to /login
+# Login → should reach /dashboard
+# Dashboard health dots should be green
+```
+
+---
+
+## Docker Commands Reference
+
+```bash
+# Start everything
+docker compose -f infrastructure/docker/docker-compose.yml up -d
+
+# Rebuild api only (after Python changes)
+docker compose -f infrastructure/docker/docker-compose.yml build co-op-api
+docker compose -f infrastructure/docker/docker-compose.yml up -d co-op-api
+
+# See logs
+docker compose -f infrastructure/docker/docker-compose.yml logs co-op-api -f
+
+# Run migrations
+docker exec co-op-api alembic upgrade head
+
+# Connect to database
+docker exec -it co-op-postgres-1 psql -U coop -d coop
+
+# Full restart
+docker compose -f infrastructure/docker/docker-compose.yml down
+docker compose -f infrastructure/docker/docker-compose.yml up -d
+```

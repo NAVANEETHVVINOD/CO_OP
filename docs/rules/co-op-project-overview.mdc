@@ -1,0 +1,82 @@
+---
+alwaysApply: true
+---
+
+# Co-Op — Solo Developer Autonomous Company OS
+
+## What This Project Is
+
+Co-Op is a **self-hosted autonomous company operating system** built for solo developers.
+It uses AI agents to find clients, write proposals, communicate professionally,
+track projects, and create invoices — with human approval for every important action.
+
+**Solo Developer Edition:** Start with 6 services. Earn first money. Scale when needed.
+
+**GitHub:** https://github.com/NAVANEETHVVINOD/CO_OP
+
+---
+
+## Current State
+
+### ✅ Working (Stage 1 Foundation)
+- Full RAG pipeline: upload → parse → chunk → embed → Qdrant index
+- Hybrid search: BM25 + dense vectors, RRF merge, cross-encoder rerank
+- LangGraph research agent: retrieve → rerank → generate
+- SSE streaming chat with citations
+- JWT authentication, dark dashboard, 10 pages
+- PostgreSQL + MinIO + Redis + Qdrant in Docker
+
+### 🔧 Stage 1 Bugs to Fix
+1. Docker env vars not passed to co-op-api
+2. conversations.tenant_id migration not applied
+3. python-multipart missing from pyproject.toml
+
+---
+
+## Growth Stages
+
+| Stage | Services | Goal | Timeline |
+|-------|----------|------|----------|
+| 1 | 6 | Working chatbot, v0.1.0 | This week |
+| 2 | 8 (+ollama, litellm) | Real LLM + Telegram + Upwork | Month 2 |
+| 3 | 12 (+browserless, vault, llm-guard, communication) | Proposals + revenue | Month 3-4 |
+| 4 | Per trigger | Full v5.3 when needed | Month 5+ |
+
+**Philosophy:** Add complexity only when you feel the specific pain of not having it.
+
+---
+
+## Technology Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 15 + CSS Variables + Zustand + TanStack Query |
+| Backend | FastAPI + async SQLAlchemy + Alembic |
+| AI/Agents | LangGraph + LiteLLM (stubbed in Stage 1, Ollama in Stage 2) |
+| Background Tasks | **ARQ** (Stages 1-3), Celery/Temporal (Stage 4 only) |
+| Knowledge | Qdrant + all-MiniLM-L6-v2 (384-dim) |
+| Events | Redis Streams |
+| Storage | PostgreSQL 16 + MinIO S3 |
+| Deployment | Docker Compose (all stages) → K8s (Stage 4 enterprise) |
+
+---
+
+## Key Documents
+
+| Document | Purpose |
+|----------|---------|
+| `docs/CO_OP_SOLO_DEVELOPER_ARCHITECTURE.md` | Full architecture blueprint |
+| `docs/CO_OP_SOLO_TASKS_UPDATED.md` | 83-task checklist across 4 stages |
+| `docs/stage1_implementation.md` | Stage 1 guide |
+| `docs/stage2_implementation.md` | Stage 2 guide |
+| `docs/stage3_implementation.md` | Stage 3 guide |
+| `docs/stage4_implementation.md` | Stage 4 trigger guide |
+| `docs/rules/*.mdc` | AI IDE constraint files |
+
+---
+
+## Test Credentials
+```
+Admin user:   admin@co-op.local / testpass123
+Default tenant: co-op (auto-created on startup)
+```

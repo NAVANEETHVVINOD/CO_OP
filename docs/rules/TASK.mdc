@@ -1,0 +1,48 @@
+---
+alwaysApply: true
+---
+
+# Current Task List — Quick Reference
+
+> Full task list: `docs/CO_OP_SOLO_TASKS_UPDATED.md`
+> This file is a summary only. Always check the full list for "Done when" conditions.
+
+## Current Stage: 1 — The Foundation
+
+### Priority: Fix Bugs First
+- [ ] T-001: Fix missing env vars in docker-compose.yml
+- [ ] T-002: Run missing database migration
+- [ ] T-003: Add python-multipart and rebuild
+
+### Then: Verify Everything
+- [ ] T-004: All 6 services healthy
+- [ ] T-005: Health endpoint returns ok
+- [ ] T-006: Login returns JWT token
+- [ ] T-007: TypeScript build clean
+- [ ] T-008: No hydration errors
+
+### Then: Test User Flows
+- [ ] T-009 to T-016: End-to-end user flow testing
+
+### Finally: Ship
+- [ ] T-017 to T-020: Push to GitHub, tag v0.1.0
+
+---
+
+## Stage Summary
+
+| Stage | Tasks | Status |
+|-------|-------|--------|
+| Stage 1 | T-001 to T-020 (20 tasks) | ⬅ CURRENT |
+| Stage 2 | T-021 to T-042 (22 tasks) | ⏳ Next |
+| Stage 3 | T-043 to T-068 (26 tasks, 2 optional) | ⏳ Later |
+| Stage 4 | T-069 to T-083 (15 tasks, triggered) | ⏳ When needed |
+
+---
+
+## Key Implementation Guides
+
+- `docs/stage1_implementation.md` — Bug fixes, verification steps
+- `docs/stage2_implementation.md` — LLM, ARQ, Telegram, Lead Scout
+- `docs/stage3_implementation.md` — Proposals, revenue, agents
+- `docs/stage4_implementation.md` — Scaling triggers

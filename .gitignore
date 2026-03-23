@@ -1,0 +1,48 @@
+# Python
+services/api/.venv/
+services/api/.pytest_cache/
+services/api/__pycache__/
+services/api/test.db
+services/api/uploads/
+**/__pycache__/
+**/*.pyc
+*.egg-info/
+.venv/
+venv/
+
+# Node
+apps/web/node_modules/
+apps/web/.next/
+node_modules/
+dist/
+build/
+out/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+infrastructure/docker/.env
+
+# IDE
+.vscode/settings.json
+.idea/
+.turbo/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log
+coverage/
+*.db
+
+# Scratch / temp files
+doc_text_latest.txt
+doc_v4.txt
+extract_pdf.py
+extract.py
+image.png
+test_doc.txt
+services/api/pytest_output.txt

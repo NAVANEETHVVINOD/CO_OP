@@ -1,0 +1,13 @@
+{
+  "executionEnvironments": [
+    {
+      "root": "services/api",
+      "venvPath": "services/api",
+      "venv": ".venv",
+      "pythonVersion": "3.12"
+    }
+  ],
+  "typeCheckingMode": "basic",
+  "reportMissingImports": "warning",
+  "reportMissingTypeStubs": false
+}

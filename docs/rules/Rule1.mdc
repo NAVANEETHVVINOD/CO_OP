@@ -1,0 +1,16 @@
+---
+alwaysApply: true
+---
+
+# Read Before Coding — Rule 1
+
+Before starting ANY work on this project, read these files IN ORDER:
+
+1. `docs/rules/PROJECT.mdc` — Project identity, current stage, constraints
+2. `docs/rules/co-op-solo-guidelines.mdc` — Stage technology matrix, AI IDE instructions
+3. `docs/rules/co-op-critical-constraints.mdc` — Hard rules that must never be violated
+4. `docs/CO_OP_SOLO_TASKS_UPDATED.md` — Complete task checklist (83 tasks, 4 stages)
+5. `docs/stage[X]_implementation.md` — Implementation guide for the current stage
+6. All other `.mdc` files in `docs/rules/` — Coding standards, API contracts, file structure
+
+**After reading these files, confirm which stage the project is in before writing any code.**

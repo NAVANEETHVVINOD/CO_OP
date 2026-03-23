@@ -1,0 +1,177 @@
+---
+alwaysApply: true
+---
+
+# Coding Standards — Solo Developer Edition
+
+## Python (FastAPI Backend)
+
+### Every Python file must follow these rules:
+
+```python
+# 1. Full type annotations — mypy strict
+async def get_document(doc_id: UUID, db: AsyncSession) -> Document | None:
+    ...
+
+# 2. Async everywhere — no blocking I/O
+# WRONG:
+def get_embedding(text: str) -> list[float]:
+    return model.encode(text)  # blocks event loop
+
+# RIGHT:
+async def get_embedding(text: str) -> list[float]:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, model.encode, text)
+
+# 3. Pydantic v2 for ALL schemas
+class DocumentCreate(BaseModel):
+    filename: str
+    file_type: Literal["pdf", "docx", "txt", "md"]
+    tenant_id: UUID
+
+# 4. Repository pattern — NO SQL in routers
+doc = await document_repo.get_by_id(db, doc_id)
+
+# 5. Config via Pydantic Settings — NO os.environ directly
+from app.config import get_settings
+settings = get_settings()
+
+# 6. Error handling — never bare except
+try:
+    result = await some_operation()
+except SpecificException as e:
+    logger.error("operation failed", error=str(e))
+    raise HTTPException(status_code=500, detail="Operation failed")
+```
+
+### ARQ Background Tasks (Stages 1-3)
+
+```python
+# Use ARQ for all background tasks — NOT Celery
+import arq
+from arq.connections import RedisSettings
+
+async def my_background_task(ctx, task_id: str):
+    """Background task running inside co-op-api container"""
+    # ctx contains the Redis connection pool
+    redis = ctx['redis']
+    # Do async work here
+    result = await do_async_work(task_id)
+    return result
+
+class WorkerSettings:
+    functions = [my_background_task]
+    redis_settings = RedisSettings(host='redis')
+    cron_jobs = [
+        arq.cron(system_monitor, minute={0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55}),
+        arq.cron(morning_brief, hour=8, minute=0),
+        arq.cron(backup, hour=2, minute=0),
+    ]
+```
+
+Key ARQ rules:
+- **All tasks must be async** — ARQ is asyncio-native
+- **WorkerSettings in `app/worker.py`** — single source of truth for all tasks
+- **Use cron_jobs for scheduled work** — not external cron
+- **Worker runs inside co-op-api container** — no separate container until Stage 4
+- **DO NOT switch to Celery** until Stage 4 when you genuinely outgrow ARQ
+
+### Import order (ruff enforced):
+```python
+# stdlib
+import asyncio
+from uuid import UUID
+
+# third party
+from fastapi import FastAPI, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+# local
+from app.config import get_settings
+from app.db.session import get_db
+```
+
+---
+
+## TypeScript (Next.js Frontend)
+
+### Every TypeScript file must follow these rules:
+
+```typescript
+// 1. Strict mode — NO any
+const data: DocumentResponse = await response.json()
+
+// 2. API calls via apiFetch (with auto-retry on 401)
+import { apiFetch } from '@/lib/api'
+const res = await apiFetch('/v1/documents')
+
+// 3. Server state via TanStack Query — NOT useEffect + fetch
+const { data: documents, isLoading } = useQuery({
+  queryKey: ['documents'],
+  queryFn: () => getDocuments()
+})
+
+// 4. Proper TypeScript interfaces from types/api.ts
+
+// 5. Props interfaces required
+interface ChatInputProps {
+  onSend: (message: string) => void
+  disabled: boolean
+  placeholder?: string
+}
+```
+
+### Component structure:
+```typescript
+'use client'  // Only if needed — prefer Server Components
+
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { StatusBadge } from '@/components/shared/StatusBadge'
+import type { Document } from '@/types/api'
+
+export default function DocumentsPage() {
+  // 1. Hooks
+  // 2. Derived state
+  // 3. Event handlers
+  // 4. Loading state
+  if (isLoading) return <SkeletonLayout />
+  // 5. Error state
+  if (error) return <ErrorState message={error.message} />
+  // 6. Render
+  return (...)
+}
+```
+
+---
+
+## Design System (Dark Theme)
+
+CSS Variables (defined in globals.css):
+```css
+--bg-base: #0A0A0F        /* page background */
+--bg-surface: #12121A     /* cards, sidebar */
+--bg-elevated: #1A1A26    /* hover states, inputs */
+--border: #2A2A3A         /* subtle borders */
+--border-bright: #3A3A50  /* hover borders */
+--accent: #2563EB         /* primary blue */
+--accent-glow: rgba(37,99,235,0.15)
+--status-green: #22C55E
+--status-red: #EF4444
+--status-amber: #F59E0B
+--text-primary: #F1F5F9
+--text-secondary: #94A3B8
+--text-muted: #475569
+```
+
+---
+
+## Git Commit Convention
+```
+feat: add document polling UI
+fix: resolve DB_PASS missing from docker-compose
+chore: update .gitignore
+refactor: extract StatusDot to shared component
+test: add conversation repository tests
+docs: update README quickstart
+```

@@ -1,0 +1,123 @@
+---
+alwaysApply: true
+---
+
+# Co-Op Growth Stages — Solo Developer Edition
+
+> Replaces the old Phase 0-4 enterprise approach.
+> See `docs/CO_OP_SOLO_DEVELOPER_ARCHITECTURE.md` for full details.
+
+## The 4 Growth Stages
+
+```
+STAGE 1 (Week 1):     6 services — Company GPT. Talking chatbot.
+STAGE 2 (Month 2):    8 services — Real AI. Telegram. Lead Search.
+STAGE 3 (Month 3-4): 12 services — Agents proposing and communicating.
+STAGE 4 (Month 5+):  Full v5.3 — When revenue justifies complexity.
+```
+
+**The One Rule:** Never add a service unless you feel the pain of not having it.
+
+---
+
+## Stage 1 — The Foundation
+
+**Services:** co-op-api, co-op-web, postgres, redis, qdrant, minio
+**Goal:** Working chatbot you can demo to anyone
+**Deliverables:**
+- Upload PDF → AI answers questions (RAG pipeline)
+- Login, dashboard, search, chat all work
+- v0.1.0 on GitHub
+
+**Not yet:** Real LLM, Telegram, agents, external APIs
+
+---
+
+## Stage 2 — Real Intelligence
+
+**Add:** ollama (+11434), litellm (+4000)
+**Goal:** Real LLM + Telegram control + Upwork reading
+**Key decisions:**
+- **ARQ** for background tasks (not Celery)
+- Telegram bot runs **inside co-op-api** (no new container)
+- Lead Scout uses **httpx** (no Browserless yet)
+
+**Deliverables:**
+- Real LLM-generated answers
+- Telegram: /status, /pause, /panic, /approve, /budget
+- Lead Scout reading Upwork every 4 hours
+- Morning brief at 8am
+- Hardware detection + sandbox tier
+
+---
+
+## Stage 3 — Working Agents
+
+**Add:** browserless (+8030), vault (+8200), llm-guard (+8060), communication (+8010)
+**Goal:** Proposals submitted. First revenue.
+**Architecture notes:**
+- STILL no Temporal — use ARQ task chains
+- STILL no NATS — Redis queues are fine
+- STILL no Neo4j — PostgreSQL JSONB
+- STILL no OPA — FastAPI role checks
+- STILL no microsandbox — Docker sandbox only
+
+**Deliverables:**
+- Proposal Writer automates proposals
+- HITL approval via Telegram
+- Outreach Manager submits to Upwork
+- Client Communicator handles email
+- Project Tracker with milestones
+- Finance Manager creates invoices
+- Simulation mode for testing
+
+---
+
+## Stage 4 — Scaling to Full v5.3
+
+**Add:** only when you feel the specific pain (see trigger list)
+**Goal:** Enterprise-grade components as needed
+
+**Key triggers:**
+| Pain | Add |
+|------|-----|
+| ARQ loses tasks on crash | Temporal |
+| Agents burn money in loops | Zombie detector |
+| Need to debug agent decisions | OpenTelemetry + Grafana |
+| Docker sandbox feels unsafe | microsandbox |
+| Complex permissions for team | OPA |
+| 50+ clients need graph queries | Neo4j |
+| Revenue > £10k, need scale | Traefik + multi-node |
+
+See `docs/stage4_implementation.md` for full trigger list.
+
+---
+
+## Service Comparison: Solo vs Full
+
+| Service | Stage 1 | Stage 2 | Stage 3 | Full v5.3 |
+|---------|---------|---------|---------|-----------|
+| co-op-api | ✅ | ✅ | ✅ | ✅ |
+| co-op-web | ✅ | ✅ | ✅ | ✅ |
+| postgres | ✅ | ✅ | ✅ | ✅ |
+| redis | ✅ | ✅ | ✅ | ✅ |
+| qdrant | ✅ | ✅ | ✅ | ✅ |
+| minio | ✅ | ✅ | ✅ | ✅ |
+| ollama | — | ✅ | ✅ | ✅ |
+| litellm | — | ✅ | ✅ | ✅ |
+| browserless | — | — | ✅ | ✅ |
+| vault | — | — | ✅ | ✅ |
+| llm-guard | — | — | ✅ | ✅ |
+| communication | — | — | ✅ | ✅ |
+| temporal | — | — | — | When triggered |
+| neo4j | — | — | — | When triggered |
+| opa | — | — | — | When triggered |
+
+---
+
+## Implementation Guides
+
+- `docs/stage1_implementation.md` — Foundation setup + bug fixes
+- `docs/stage2_implementation.md` — LLM, ARQ, Telegram, Lead Scout
+- `docs/stage3_implementation.md` — Agents, proposals, revenue ops
+- `docs/stage4_implementation.md` — Scaling triggers + decision framework

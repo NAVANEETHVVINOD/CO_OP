@@ -1,0 +1,10 @@
+[project]
+name = "co-op"
+version = "0.1.0"
+description = "Co-Op Enterprise AI Operating System"
+requires-python = ">=3.11"
+authors = [{ name = "Co-Op Team" }]
+dependencies = []
+
+[tool.uv.workspace]
+members = ["services/*", "packages/*"]

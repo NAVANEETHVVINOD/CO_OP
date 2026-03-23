@@ -1,0 +1,128 @@
+---
+alwaysApply: true
+---
+
+# Critical Constraints — Solo Developer Edition
+
+## ⛔ HARD RULES — NEVER VIOLATE THESE
+
+### Rule 1: STAGE DISCIPLINE — "No X Until Stage Y"
+
+| Component | NOT Available Until | Use Instead (Stages 1-3) |
+|-----------|--------------------|-----------------------------|
+| Temporal | Stage 4 | ARQ task chains |
+| Celery | Stage 4 | ARQ (asyncio-native) |
+| NATS JetStream | Stage 4 | Redis Streams |
+| Neo4j | Stage 4 | PostgreSQL JSONB |
+| OPA | Stage 4 | FastAPI role checks |
+| Keycloak | Stage 4 | Simple JWT auth |
+| microsandbox | Stage 4 | Docker sandbox |
+| Traefik | Stage 4 | Direct port access |
+| Kubernetes | Stage 4 | Docker Compose |
+| Istio | Stage 4 | Not needed |
+| CrewAI | Stage 4 | LangGraph only |
+| Ollama/LiteLLM | **Stage 2** | Stubbed inference |
+| Browserless | **Stage 3** | httpx requests |
+| Vault | **Stage 3** | .env files |
+| LLM Guard | **Stage 3** | None (no external input yet) |
+
+**If your AI IDE suggests adding any of these before their stage: REFUSE IT.**
+
+### Rule 2: NO API KEYS REQUIRED IN STAGE 1
+```
+NO Ollama installation required (Stage 1)
+NO OpenAI API key
+NO Claude/Anthropic API key
+NO HuggingFace paid tier
+```
+Stage 1 uses stubbed inference — answers assembled from RAG chunks.
+This is intentional and working. Real LLM comes in Stage 2 (Ollama + LiteLLM).
+
+### Rule 3: NEVER TOUCH THE WORKING RAG PIPELINE
+The Python backend RAG pipeline in `services/api/` is verified working.
+Do NOT modify these files unless fixing a specific bug:
+- `agent/graph.py`
+- `agent/nodes.py`
+- `services/search.py`
+- `services/reranker.py`
+- `services/parser.py`
+- `core/embedder.py`
+
+### Rule 4: NO PLACEHOLDERS
+Every file must be complete. No:
+- `// TODO: implement this`
+- `pass` statements in functions
+- Stub functions that return `None`
+- `// Coming soon`
+
+### Rule 5: ENVIRONMENT VARIABLES ONLY
+Never hardcode passwords, secret keys, connection strings, or API keys.
+Always use environment variables from `.env` files (Stages 1-2) or Vault (Stage 3+).
+
+### Rule 6: DOCKER SERVICE NAMES (NOT localhost)
+Inside Docker Compose, services communicate using service names:
+```
+postgres → host: postgres (NOT localhost)
+redis    → host: redis (NOT localhost)
+qdrant   → host: qdrant (NOT localhost)
+minio    → host: minio (NOT localhost)
+```
+
+### Rule 7: useChat.ts IS WORKING — DO NOT REWRITE IT
+The file `apps/web/src/hooks/useChat.ts` handles SSE streaming correctly.
+Import it. Never rewrite it. Never replace it.
+
+### Rule 8: ARQ FOR BACKGROUND TASKS (STAGES 1-3)
+All background tasks must use ARQ, not Celery:
+```python
+# RIGHT (Stages 1-3)
+import arq
+async def my_task(ctx, data: str):
+    ...
+
+# WRONG (Stages 1-3)
+from celery import Celery
+```
+
+### Rule 9: POSTGRESQL JSONB FOR RELATIONSHIPS (STAGES 1-3)
+Store client facts, agent memory, milestones in PostgreSQL JSONB.
+Do NOT add Neo4j until Stage 4 when you have 50+ clients.
+
+---
+
+## Required `.env` Variables
+
+### Stage 1-2: `infrastructure/docker/.env`
+```env
+DB_PASS=cooppassword123
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin123
+SECRET_KEY=super-secret-key-change-in-production-min-32-chars
+ENVIRONMENT=development
+```
+
+### Stage 2 additions:
+```env
+TELEGRAM_BOT_TOKEN=your-bot-token-from-botfather
+LITELLM_API_KEY=sk-your-litellm-key
+```
+
+### Stage 3: Migrate all secrets to Vault
+
+The root `.env` and `infrastructure/docker/.env` must be in sync.
+`services/api/.env` is NOT used in Docker — vars come from `docker-compose.yml`.
+
+---
+
+## SSE Event Format (Never Change This)
+```
+event: token
+data: {"content": "text here"}
+
+event: citation
+data: {"source": "file.pdf", "page": 4, "score": 0.94}
+
+event: done
+data: {"conversation_id": "uuid", "cost_usd": 0}
+```
+The frontend `useChat.ts` expects EXACTLY this format.

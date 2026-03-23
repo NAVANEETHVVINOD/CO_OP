@@ -1,0 +1,111 @@
+---
+alwaysApply: true
+---
+
+# Solo Developer Guidelines — Master Reference
+
+> This file is the single source of truth for solo developer constraints.
+> All AI IDEs must read this before writing any code.
+
+## The Solo Developer Philosophy
+
+1. **Start small** — 6 services, not 30
+2. **Add complexity when you feel the pain** — not before
+3. **One developer, one machine** — everything in Docker Compose
+4. **Revenue before polish** — working agents before beautiful code
+5. **AI IDE does the heavy lifting** — you focus on architecture decisions
+
+---
+
+## Stage Technology Matrix
+
+This table tells you EXACTLY what to use at each stage. If it says "—" you must NOT use it.
+
+| Technology | Stage 1 | Stage 2 | Stage 3 | Stage 4 |
+|-----------|---------|---------|---------|---------|
+| **LLM Provider** | Stubbed (RAG chunks) | Ollama + LiteLLM | Ollama + LiteLLM | +vLLM or Groq |
+| **Background Tasks** | — | ARQ | ARQ | Celery or Temporal |
+| **Message Queue** | — | Redis Streams | Redis Streams | NATS JetStream |
+| **Secret Management** | .env files | .env files | Vault | Vault |
+| **Auth** | Simple JWT | Simple JWT | Simple JWT | Keycloak + OPA |
+| **Web Scraping** | — | httpx | Browserless | +Proxy rotation |
+| **Data Modelling** | PostgreSQL | PostgreSQL | PostgreSQL JSONB | +Neo4j |
+| **Code Sandbox** | — | — | Docker sandbox | microsandbox |
+| **API Gateway** | — | — | — | Traefik |
+| **Service Mesh** | — | — | — | Istio (if K8s) |
+| **Orchestration** | Docker Compose | Docker Compose | Docker Compose | Docker or K8s |
+| **Prompt Injection** | — | — | LLM Guard | LLM Guard |
+| **Observability** | Docker logs | Docker logs | Docker logs | OTEL + Grafana |
+
+---
+
+## AI IDE Instructions
+
+When using Cursor, Copilot, Windsurf, or any AI IDE:
+
+### DO:
+- Tell the AI which stage you're in
+- Share relevant existing files as context
+- Give exact "Done when" criteria from the task list
+- Verify the fix works before moving on
+
+### DON'T:
+- Let the AI add services from future stages
+- Accept Celery imports (use ARQ in Stages 1-3)
+- Accept Neo4j setup (use PostgreSQL JSONB in Stages 1-3)
+- Accept Temporal/NATS/OPA/Keycloak (Stage 4 only)
+- Let the AI "refactor while fixing" — minimum change principle
+
+### Prompt Template:
+```
+I am working on Co-Op, Stage [X], Task [T-XXX]: [task name].
+
+Current services: [list from stage guide]
+Stage constraints: No [list forbidden tech for this stage]
+
+Files to review:
+- [file1]
+- [file2]
+
+Done when: [exact criteria from task list]
+
+Please implement this task.
+```
+
+---
+
+## Hardware Requirements
+
+| Stage | Minimum RAM | Recommended | Notes |
+|-------|-------------|-------------|-------|
+| 1 | 4 GB | 8 GB | Just Docker + 6 services |
+| 2 | 8 GB | 16 GB | Ollama loaded models |
+| 3 | 16 GB | 32 GB | Browserless uses RAM |
+| 4 | 32 GB | 64 GB | Per component added |
+
+---
+
+## When to Move to the Next Stage
+
+### Stage 1 → Stage 2
+Move when: Stage 1 complete (all 20 tasks done, v0.1.0 tagged on GitHub)
+
+### Stage 2 → Stage 3
+Move when: Stage 2 complete AND Lead Scout is finding real jobs.
+The pain: "I found good jobs but can't respond fast enough manually"
+
+### Stage 3 → Stage 4
+Move when: Revenue > £0/month AND a specific pain from the trigger list.
+Never add Stage 4 services preemptively.
+
+---
+
+## Files the AI IDE Must Read Before Every Task
+
+1. `docs/rules/co-op-solo-guidelines.mdc` — THIS FILE (stage constraints)
+2. `docs/rules/co-op-critical-constraints.mdc` — hard rules
+3. `docs/CO_OP_SOLO_TASKS_UPDATED.md` — current task list
+4. `docs/stage[X]_implementation.md` — current stage guide
+5. `docs/rules/co-op-api-contracts.mdc` — API endpoints + schema
+6. `services/api/app/config.py` — all configuration
+7. `infrastructure/docker/docker-compose.yml` — service definitions
