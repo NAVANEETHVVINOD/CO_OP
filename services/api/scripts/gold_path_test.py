@@ -1,5 +1,4 @@
 import asyncio
-import uuid
 import logging
 import sys
 import os
@@ -71,7 +70,7 @@ async def run_test():
         )
         db.add(milestone)
         await db.commit()
-        logger.info(f"✅ Project created and milestone 'Initial Delivery' ($500) marked as COMPLETED.")
+        logger.info("✅ Project created and milestone 'Initial Delivery' ($500) marked as COMPLETED.")
 
         # 5. Run Finance Manager
         logger.info("--- Step 4: Finance Manager ---")

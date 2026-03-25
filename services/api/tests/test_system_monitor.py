@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from sqlalchemy.exc import OperationalError
 
 from app.crons.system_monitor import run_system_monitor
 

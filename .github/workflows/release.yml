@@ -40,7 +40,10 @@ jobs:
         with:
           node-version: 20
       - name: install pnpm
-        run: npm install -g pnpm
+        # pnpm/action-setup @ v4.0.0
+        uses: pnpm/action-setup@feaa28b6d512ca8b4793f61536f98cd83d59e354
+        with:
+          version: 9.12.0
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: install dependencies (ubuntu only)
@@ -61,7 +64,8 @@ jobs:
           releaseBody: "Automated release from GitHub Actions."
           releaseDraft: true
           prerelease: false
-          args: --manifest apps/desktop/src-tauri/Cargo.toml
+          args: ""
+          manifestPath: apps/desktop/src-tauri/Cargo.toml
 
   create-release:
     name: Finalize GitHub Release

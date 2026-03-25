@@ -1,9 +1,8 @@
 import uuid
 from enum import Enum
-from typing import Any, Dict, Optional
-from app.db.models import Approval, Tenant
+from typing import Any, Dict
+from app.db.models import Approval
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
 class RiskLevel(str, Enum):
     READ_ONLY = "READ_ONLY"

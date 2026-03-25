@@ -26,7 +26,6 @@ async def list_approvals(
     )
     return result.scalars().all()
 
-import uuid
 
 @router.post("/{approval_id}/approve")
 async def approve_action(

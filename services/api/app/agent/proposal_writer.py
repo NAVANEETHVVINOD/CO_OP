@@ -1,11 +1,11 @@
 import logging
 import uuid
 import httpx
-from typing import Dict, Any, List
+from typing import Dict, Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models import Lead, Approval, PromptVersion
-from app.core.hitl import hitl_manager, RiskLevel
+from app.db.models import Lead
+from app.core.hitl import hitl_manager
 from app.core.simulation import is_simulation_mode
 from app.config import get_settings
 from app.services.vector_search import search_relevant_chunks

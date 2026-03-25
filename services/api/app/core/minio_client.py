@@ -22,9 +22,9 @@ def init_minio():
         try:
             if not minio_client.bucket_exists(bucket):
                 minio_client.make_bucket(bucket)
-                logger.info(f"Created MinIO bucket", bucket=bucket)
+                logger.info("Created MinIO bucket", bucket=bucket)
         except S3Error as err:
-            logger.error(f"MinIO error", error=str(err))
+            logger.error("MinIO error", error=str(err))
 
 def upload_file(bucket_name: str, object_name: str, data: bytes, content_type: str = "application/octet-stream") -> bool:
     try:
@@ -37,7 +37,7 @@ def upload_file(bucket_name: str, object_name: str, data: bytes, content_type: s
         )
         return True
     except S3Error as err:
-        logger.error(f"MinIO upload error", error=str(err))
+        logger.error("MinIO upload error", error=str(err))
         return False
 
 def get_file(bucket_name: str, object_name: str) -> bytes | None:
@@ -48,7 +48,7 @@ def get_file(bucket_name: str, object_name: str) -> bytes | None:
         response.release_conn()
         return data
     except S3Error as err:
-        logger.error(f"MinIO get error", error=str(err))
+        logger.error("MinIO get error", error=str(err))
         return None
 
 def delete_file(bucket_name: str, object_name: str) -> bool:
@@ -56,5 +56,5 @@ def delete_file(bucket_name: str, object_name: str) -> bool:
         minio_client.remove_object(bucket_name, object_name)
         return True
     except S3Error as err:
-        logger.error(f"MinIO delete error", error=str(err))
+        logger.error("MinIO delete error", error=str(err))
         return False

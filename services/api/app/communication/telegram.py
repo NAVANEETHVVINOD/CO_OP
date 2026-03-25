@@ -4,10 +4,9 @@ Uses python-telegram-bot with long polling (no webhook needed).
 Started as an asyncio background task in the FastAPI lifespan.
 """
 import logging
-import asyncio
 from typing import Optional
 
-from telegram import Bot, Update
+from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
 
 from app.config import get_settings

@@ -25,23 +25,23 @@ mock_st.CrossEncoder = DummyCrossEncoder
 sys.modules['sentence_transformers'] = mock_st
 
 # Override for Redis to prevent connection faults during local testing
-import redis.asyncio
+import redis.asyncio  # noqa: E402
 def mock_from_url(*args, **kwargs):
     return AsyncMock()
 redis.asyncio.from_url = mock_from_url
 redis.asyncio.Redis.from_url = mock_from_url
 
-import qdrant_client
+import qdrant_client  # noqa: E402
 mock_qdrant_class = MagicMock()
 mock_qdrant_class.return_value.search = AsyncMock(return_value=[])
 mock_qdrant_class.return_value.query_points = AsyncMock(return_value=MagicMock(points=[]))
 qdrant_client.AsyncQdrantClient = mock_qdrant_class
 
-import minio
+import minio  # noqa: E402
 minio.Minio = MagicMock()
 
 # ── Environment variables (set BEFORE importing app) ────────────────────
-import os
+import os  # noqa: E402
 _test_env = {
     "DATABASE_URL":       "postgresql+asyncpg://test:test@localhost/test",
     "REDIS_URL":          "redis://localhost:6379",
@@ -61,8 +61,8 @@ os.environ["USE_QDRANT"] = "True"
 
 # ── Patch SQLAlchemy Uuid type for SQLite support ───────────────────────
 #    Must patch BEFORE models are loaded so metadata.create_all uses CHAR(32).
-from sqlalchemy.sql import sqltypes as _sqltypes
-import sqlalchemy.types as _sa_types
+from sqlalchemy.sql import sqltypes as _sqltypes  # noqa: E402
+import sqlalchemy.types as _sa_types  # noqa: E402
 
 _orig_gen_impl = _sqltypes.Uuid._gen_dialect_impl
 
@@ -111,14 +111,13 @@ def _sqlite_result_processor(self, dialect, coltype):
 _sqltypes.Uuid.result_processor = _sqlite_result_processor
 
 # ── NOW import app ──────────────────────────────────────────────────────
-import pytest
-import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+import pytest_asyncio  # noqa: E402
+from httpx import AsyncClient, ASGITransport  # noqa: E402
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession  # noqa: E402
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.pool import StaticPool  # noqa: E402
 
 engine = create_async_engine(
     TEST_DATABASE_URL,
@@ -135,13 +134,13 @@ TestingSessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
-import app.db.session
+import app.db.session  # noqa: E402
 app.db.session.AsyncSessionLocal = TestingSessionLocal
 app.db.session.engine = engine
 
-from app.db.base import Base
-from app.main import app
-from app.dependencies import get_db
+from app.db.base import Base  # noqa: E402
+from app.main import app  # noqa: E402
+from app.dependencies import get_db  # noqa: E402
 
 app.state.limiter.enabled = False
 
@@ -175,7 +174,7 @@ async def cleanup_db(db_session: AsyncSession):
     for table in tables:
         try:
             await db_session.execute(delete(table))
-        except:
+        except Exception:
             pass
     await db_session.commit()
 

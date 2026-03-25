@@ -2,7 +2,7 @@ import json
 import logging
 import asyncio
 import uuid
-from typing import List, Dict, Any, AsyncGenerator
+from typing import List, Dict, AsyncGenerator
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse

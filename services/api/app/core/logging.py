@@ -1,7 +1,6 @@
 import logging
 import sys
 import structlog
-import os
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 

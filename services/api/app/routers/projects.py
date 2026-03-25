@@ -1,3 +1,4 @@
+import uuid
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,7 +39,7 @@ async def get_milestones(
         .where(Project.tenant_id == current_user.tenant_id)
     )
     return result.scalars().all()
-import uuid
+
 
 @router.post("/milestones/{milestone_id}/complete")
 async def complete_milestone(

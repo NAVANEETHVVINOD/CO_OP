@@ -4,7 +4,7 @@ from httpx import AsyncClient
 @pytest.mark.asyncio
 async def test_auth_login_success(async_client: AsyncClient):
     # Testing login with the seeded admin user
-    response = await async_client.post(
+    await async_client.post(
         "/v1/auth/token",
         data={
             "username": "admin@co-op.local",

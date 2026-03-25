@@ -1,6 +1,6 @@
 import zlib
 import re
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 from collections import Counter
 
 class BM25Encoder:

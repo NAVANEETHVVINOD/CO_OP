@@ -1,6 +1,4 @@
 import pytest
-import uuid
-import os
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import Tenant, User

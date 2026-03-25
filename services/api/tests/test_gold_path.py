@@ -1,7 +1,6 @@
 import pytest
-import uuid
 from sqlalchemy import select
-from app.db.models import Tenant, Lead, Project, Milestone, Invoice
+from app.db.models import Lead, Project, Milestone, Invoice
 from app.agent.lead_scout import run_lead_scout
 from app.agent.proposal_writer import draft_proposal
 from app.agent.finance_manager import process_billing

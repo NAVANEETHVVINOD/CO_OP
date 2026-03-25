@@ -1,11 +1,11 @@
 import uuid
 from typing import Optional, List, TypeVar, Generic, Type
 
-from sqlalchemy import select, String
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.db.models import User, Document, AuditEvent, Tenant
+from app.db.models import User, Document, AuditEvent
 from app.db.base import Base
 
 ModelType = TypeVar("ModelType", bound=Base)

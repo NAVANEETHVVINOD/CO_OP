@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models import Milestone, Project
+from app.db.models import Milestone
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Dict, Any
+from typing import List
 from qdrant_client.models import PointStruct
 from app.db.qdrant_client import qdrant, COLLECTION_NAME
 from app.core.embedder import embedder

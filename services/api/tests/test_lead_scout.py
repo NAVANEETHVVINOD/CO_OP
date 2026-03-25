@@ -1,10 +1,9 @@
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch
 
 from app.agent.lead_scout import run_lead_scout
 from app.db.models import Lead, Tenant
 
-from unittest.mock import patch
 
 @pytest.mark.asyncio
 @patch("app.agent.lead_scout._score_job")

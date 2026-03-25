@@ -75,7 +75,7 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"Hardware detection failed (non-fatal): {e}")
 
-    hardware_task = asyncio.create_task(_detect_hardware())
+    asyncio.create_task(_detect_hardware())
 
     # --- Stage 2: Telegram bot (if configured) ---
     telegram_started = False

@@ -90,7 +90,7 @@ async def refresh_access_token(
     # A real implementation would verify the refresh token signature similarly to verify_token
     # But we'll just use the already defined dependency logic inline or rely on the same exception catching
     from app.config import get_settings
-    from jose import jwt, JWTError
+    import jwt
     from app.core.security import ALGORITHM
     
     settings = get_settings()
@@ -104,7 +104,7 @@ async def refresh_access_token(
         user_id_str: str = payload.get("sub")
         if user_id_str is None:
             raise credentials_exception
-    except JWTError:
+    except jwt.PyJWTError:
         raise credentials_exception
 
     user_repo = UserRepository(db)

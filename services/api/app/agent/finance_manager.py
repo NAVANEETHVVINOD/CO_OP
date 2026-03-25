@@ -1,9 +1,8 @@
 import logging
 import uuid
-from typing import Dict, Any, List
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models import Invoice, Project, Milestone, Tenant
+from app.db.models import Invoice, Project, Milestone
 from app.communication.telegram import send_message
 
 logger = logging.getLogger(__name__)

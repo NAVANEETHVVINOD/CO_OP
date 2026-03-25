@@ -1,13 +1,11 @@
 import uuid
-import os
-import aiofiles
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.db.repositories import DocumentRepository
 from app.dependencies import verify_token
-from app.db.models import User, Document
+from app.db.models import User
 from app.core.redis_client import publish_ingestion_event
 
 from app.core.minio_client import upload_file, delete_file

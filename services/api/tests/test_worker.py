@@ -1,4 +1,3 @@
-import pytest
 
 def test_worker_settings_loads():
     from app.worker import WorkerSettings

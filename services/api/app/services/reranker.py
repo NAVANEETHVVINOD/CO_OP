@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Tuple, Dict, Any
+from typing import List, Dict, Any
 from sentence_transformers import CrossEncoder
 from concurrent.futures import ThreadPoolExecutor
 

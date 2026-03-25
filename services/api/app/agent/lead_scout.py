@@ -1,7 +1,6 @@
 import logging
 import uuid
 import random
-from datetime import datetime, timezone
 from typing import Dict, List, Any
 
 import httpx
@@ -146,7 +145,7 @@ async def _score_job(tenant_id: str, job: Dict[str, Any]) -> float:
                 try:
                     res = json.loads(content)
                     return float(res.get("score", 0))
-                except:
+                except Exception:
                     import re
                     match = re.search(r"\"score\":\s*(\d+)", content)
                     if match:
@@ -246,7 +245,7 @@ async def run_lead_scout() -> None:
                 f"*{i + 1}.* [{job['title'][:60]}]({job.get('url', '#')})\n"
                 f"   Score: {job['score']:.0f}/100\n"
             )
-        lines.append(f"\n_Matched against your portfolio using RAG._")
+        lines.append("\n_Matched against your portfolio using RAG._")
         lines.append(f"_Total jobs analyzed: {len(scored_jobs)}_")
 
         if chat_id:

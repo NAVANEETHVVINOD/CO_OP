@@ -87,6 +87,12 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
 
 
+      - name: Install pnpm
+        # pnpm/action-setup @ v4.0.0
+        uses: pnpm/action-setup@feaa28b6d512ca8b4793f61536f98cd83d59e354
+        with:
+          version: 9.12.0
+
       - name: Set up Node.js
         # actions/setup-node @ v4.0.3
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
@@ -178,6 +184,11 @@ jobs:
 
           SUSPICIOUS=0
           for f in $PTH_FILES; do
+            # Allowlist distutils-precedence.pth (it's a standard setuptools file that looks like a hook but is harmless)
+            if echo "$f" | grep -lq "distutils-precedence.pth"; then
+              continue
+            fi
+
             if grep -qEi "subprocess|exec|eval|base64|__import__|os\.system|socket|urllib|requests|curl" "$f"; then
               echo "🚨 SUSPICIOUS .pth file detected: $f"
               echo "--- Contents ---"

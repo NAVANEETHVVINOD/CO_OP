@@ -1,9 +1,7 @@
-import os
-import uuid
 from typing import Dict, Any, List
 
 from app.agent.state import AgentState
-from app.services.search import _perform_search, _compute_rrf, embedder, bm25_encoder, qdrant, models
+from app.services.search import _perform_search, _compute_rrf, embedder, bm25_encoder, models
 from app.services.reranker import reranker
 
 async def retrieve_docs(state: AgentState) -> Dict[str, Any]:

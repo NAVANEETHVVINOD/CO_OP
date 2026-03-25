@@ -4,7 +4,6 @@ from typing import Dict, Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import ClientMemory
-from app.core.simulation import is_simulation_mode
 
 logger = logging.getLogger(__name__)
 

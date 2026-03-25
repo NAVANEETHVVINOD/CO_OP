@@ -16,7 +16,7 @@ async def compute_performance_stats(db: AsyncSession):
     
     # 1. Conversion Rate
     applied_count = await db.scalar(select(func.count(Lead.id)).where(Lead.status == "applied"))
-    converted_count = await db.scalar(select(func.count(Project.id)).where(Project.lead_id != None))
+    converted_count = await db.scalar(select(func.count(Project.id)).where(Project.lead_id.is_not(None)))
     
     rate = (converted_count / applied_count) if applied_count and applied_count > 0 else 0.0
     

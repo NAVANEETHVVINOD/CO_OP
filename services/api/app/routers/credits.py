@@ -1,6 +1,6 @@
 """Credits router — Token usage endpoint for dashboard widget."""
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import select, func
