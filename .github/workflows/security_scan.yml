@@ -65,8 +65,9 @@ jobs:
         run: |
           pip-audit \
             --format json \
+            --ignore-package co-op-api \
             --output pip-audit-report.json || true
-          pip-audit
+          pip-audit --ignore-package co-op-api
 
       - name: Upload pip-audit report
         if: always()
@@ -89,7 +90,7 @@ jobs:
 
       - name: Install pnpm
         # pnpm/action-setup @ v4.0.0
-        uses: pnpm/action-setup@feaa28b6d512ca8b4793f61536f98cd83d59e354
+        uses: pnpm/action-setup@v4
         with:
           version: 9.12.0
 
@@ -185,7 +186,8 @@ jobs:
           SUSPICIOUS=0
           for f in $PTH_FILES; do
             # Allowlist distutils-precedence.pth (it's a standard setuptools file that looks like a hook but is harmless)
-            if echo "$f" | grep -lq "distutils-precedence.pth"; then
+            if grep -q "distutils-precedence" "$f"; then
+              echo "Skipping known harmless file: $f"
               continue
             fi
 

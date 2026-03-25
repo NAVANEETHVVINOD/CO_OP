@@ -28,7 +28,7 @@ async def upload_document(
     file_content = await file.read()
     
     # Upload to MinIO
-    upload_success = upload_file("raw-documents", object_name, file_content, content_type=file.content_type)
+    upload_success = upload_file("raw-documents", object_name, file_content, content_type=file.content_type or "application/octet-stream")
     if not upload_success:
         raise HTTPException(status_code=500, detail="Failed to upload document to object storage")
 

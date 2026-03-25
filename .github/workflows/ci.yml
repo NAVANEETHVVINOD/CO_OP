@@ -78,7 +78,7 @@ jobs:
 
       - name: Install pnpm
         # pnpm/action-setup @ v4.0.0
-        uses: pnpm/action-setup@feaa28b6d512ca8b4793f61536f98cd83d59e354
+        uses: pnpm/action-setup@v4
         with:
           version: 9.12.0
 

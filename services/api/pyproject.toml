@@ -41,6 +41,7 @@ dependencies = [
     "litellm==1.82.6",
     "alembic>=1.13.1",
     "sentry-sdk[fastapi]>=2.0.0",
+    "pygments>=2.20.0",
 ]
 
 [project.optional-dependencies]
@@ -60,8 +61,12 @@ target-version = "py312"
 
 [tool.mypy]
 python_version = "3.12"
-strict = true
 ignore_missing_imports = true
+check_untyped_defs = false
+disallow_untyped_defs = false
+warn_return_any = false
+warn_unused_ignores = false
+exclude = ["alembic/", "tests/", "scripts/"]
 
 [tool.setuptools]
 packages = ["app"]

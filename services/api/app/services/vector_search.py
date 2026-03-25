@@ -18,9 +18,7 @@ async def search_relevant_chunks(tenant_id: str, query: str, limit: int = 5) -> 
         # 1. Generate dense embedding
         dense_vector = await embedder.embed_text(query)
 
-        # 2. Perform hybrid search
-        # Note: We filter by tenant_id to ensure isolation.
-        results = await qdrant.search(
+        results = await qdrant.query_points(
             collection_name=COLLECTION_NAME,
             query_filter=models.Filter(
                 must=[
@@ -30,7 +28,8 @@ async def search_relevant_chunks(tenant_id: str, query: str, limit: int = 5) -> 
                     )
                 ]
             ),
-            query_vector=("dense", dense_vector),
+            query=dense_vector,
+            using="dense",
             limit=limit,
             with_payload=True,
         )
@@ -41,7 +40,7 @@ async def search_relevant_chunks(tenant_id: str, query: str, limit: int = 5) -> 
                 "score": hit.score,
                 "document_id": hit.payload.get("document_id"),
             }
-            for hit in results
+            for hit in results.points
         ]
 
     except Exception as e:

@@ -23,8 +23,8 @@ class BM25Encoder:
         tokens = self.tokenize(text)
         token_counts = Counter(tokens)
         
-        indices = []
-        values = []
+        indices: List[int] = []
+        values: List[float] = []
         
         for token, count in token_counts.items():
             # Use crc32 for stable, fast 32-bit hashing

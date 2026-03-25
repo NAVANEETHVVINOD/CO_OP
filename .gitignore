@@ -1,48 +1,58 @@
 # Python
-services/api/.venv/
-services/api/.pytest_cache/
-services/api/__pycache__/
-services/api/test.db
-services/api/uploads/
-**/__pycache__/
-**/*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
 *.egg-info/
-.venv/
-venv/
-
-# Node
-apps/web/node_modules/
-apps/web/.next/
-node_modules/
 dist/
 build/
-out/
+*.db
+services/api/test.db
+services/api/uploads/
 
-# Environment files
-.env
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
 .env.local
+
+# Rust / Tauri
+target/
+apps/desktop/src-tauri/target/
+
+# Environment & Secrets
+.env
+*.env
 .env.*.local
 infrastructure/docker/.env
-
-# IDE
-.vscode/settings.json
-.idea/
-.turbo/
+*.pem
+*.key
+*.crt
+*.id_rsa
+*.pub
+credentials.json
+service-account.json
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Misc
-*.log
-coverage/
-*.db
+# IDEs
+.vscode/
+!.vscode/settings.json
+.idea/
+.kiro/
 
-# Scratch / temp files
+# Test outputs & Temporary
+*.log
+pytest_output.txt
+test_results*.txt
+docker-compose.override.yml
 doc_text_latest.txt
 doc_v4.txt
 extract_pdf.py
 extract.py
 image.png
 test_doc.txt
-services/api/pytest_output.txt
