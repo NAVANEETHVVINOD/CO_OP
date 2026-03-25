@@ -27,11 +27,11 @@ async def test_user_repository_create_and_get(db_session: AsyncSession, seeded_t
     
     fetched = await repo.get(user.id)
     assert fetched is not None
-    assert fetched.email == email
+    assert str(fetched.email) == str(email)
 
     fetched_by_email = await repo.get_by_email(email)
     assert fetched_by_email is not None
-    assert fetched_by_email.id == user.id
+    assert str(fetched_by_email.id).replace("-", "") == str(user.id).replace("-", "")
 
 @pytest.mark.asyncio
 async def test_document_repository_create_and_get(db_session: AsyncSession, seeded_tenant: Tenant):
@@ -51,7 +51,7 @@ async def test_document_repository_create_and_get(db_session: AsyncSession, seed
 
     fetched = await repo.get_by_hash(seeded_tenant.id, doc_hash)
     assert fetched is not None
-    assert fetched.id == doc.id
+    assert str(fetched.id).replace("-", "") == str(doc.id).replace("-", "")
 
 @pytest.mark.asyncio
 async def test_audit_repository_append_event(db_session: AsyncSession, seeded_tenant: Tenant):

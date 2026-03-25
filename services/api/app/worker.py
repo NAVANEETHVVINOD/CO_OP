@@ -34,6 +34,24 @@ async def morning_brief_task(ctx: dict) -> None:
     await run_morning_brief()
 
 
+async def project_tracking_task(ctx: dict) -> None:
+    """Check milestones and project health every 24 hours."""
+    logger.info("Running project tracker...")
+    from app.agent.project_tracker import track_deadlines
+    from app.db.session import AsyncSessionLocal
+    async with AsyncSessionLocal() as db:
+        await track_deadlines(db)
+
+
+async def finance_manager_task(ctx: dict) -> None:
+    """Scan for billable milestones and handle payments every 24 hours."""
+    logger.info("Running finance manager...")
+    from app.agent.finance_manager import process_billing
+    from app.db.session import AsyncSessionLocal
+    async with AsyncSessionLocal() as db:
+        await process_billing(db)
+
+
 # ─── Worker Settings ────────────────────────────────────────────────
 
 def _get_redis_settings() -> RedisSettings:
@@ -51,7 +69,13 @@ def _get_redis_settings() -> RedisSettings:
 
 class WorkerSettings:
     """ARQ worker configuration."""
-    functions = [system_monitor_task, lead_scout_task, morning_brief_task]
+    functions = [
+        system_monitor_task, 
+        lead_scout_task, 
+        morning_brief_task,
+        project_tracking_task,
+        finance_manager_task
+    ]
     redis_settings = _get_redis_settings()
 
     cron_jobs = [
@@ -70,6 +94,18 @@ class WorkerSettings:
         cron(
             morning_brief_task,
             hour={8},
+            minute={0},
+        ),
+        # Project Tracking: daily at 00:00 UTC
+        cron(
+            project_tracking_task,
+            hour={0},
+            minute={0},
+        ),
+        # Finance Manager: daily at 01:00 UTC
+        cron(
+            finance_manager_task,
+            hour={1},
             minute={0},
         ),
     ]

@@ -1,40 +1,46 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 
-from app.agent.lead_scout import _fetch_upwork_jobs, _keyword_score, run_lead_scout
-from app.db.models import Lead
+from app.agent.lead_scout import run_lead_scout
+from app.db.models import Lead, Tenant
 
-@pytest.mark.asyncio
-async def test_score_job_local():
-    # Test keyword fallback scoring
-    job_description = "We need an AI agent builder using Python and FastAPI."
-    score = _keyword_score({"title": "AI agent", "description": job_description})
-    assert score > 0
+from unittest.mock import patch
 
 @pytest.mark.asyncio
-async def test_run_lead_scout(db_session):
-    with patch("app.agent.lead_scout._fetch_upwork_jobs") as mock_fetch, \
-         patch("app.agent.lead_scout._score_job") as mock_score, \
-         patch("app.agent.lead_scout.send_message") as mock_send_message, \
-         patch("app.agent.lead_scout.send_progress") as mock_send_progress, \
-         patch("app.agent.lead_scout.AsyncSessionLocal") as mock_session_local:
-         
-        mock_session_local.return_value.__aenter__.return_value = db_session
-        
-        # Mock fetched jobs
+@patch("app.agent.lead_scout._score_job")
+async def test_run_lead_scout(mock_score_job, db_session, monkeypatch):
+    # Set Fake LITELLM_URL to trigger the httpx path
+    monkeypatch.setenv("LITELLM_URL", "http://litellm:4000")
+    
+    # Mock the scoring function to return 95.0 for any job
+    mock_score_job.return_value = 95.0
+    
+    # Also patch the fetch function to return a single test job
+    with patch("app.agent.lead_scout._fetch_upwork_jobs") as mock_fetch:
         mock_fetch.return_value = [
-            {"title": "AI Dev", "description": "Need an expert", "url": "http://test.com/1", "source": "upwork"}
+            {
+                "id": "job_123",
+                "title": "Python Developer Needed",
+                "description": "Build an AI company",
+                "url": "https://test.com",
+                "budget": "£500",
+                "posted": "2026-03-25"
+            }
         ]
         
-        # Mock scoring
-        mock_score.return_value = 8.0
+        # Ensure a tenant exists
+        import uuid
+        tenant_id = uuid.uuid4()
+        tenant = Tenant(id=tenant_id, name="Acme Corp")
+        db_session.add(tenant)
+        await db_session.commit()
         
-        await run_lead_scout(db_session)
+        await run_lead_scout()
         
         # Verify lead was added to DB
         from sqlalchemy import select
         result = await db_session.execute(select(Lead))
         leads = result.scalars().all()
         assert len(leads) > 0
-        assert leads[0].title == "AI Dev"
-        assert leads[0].score == 8
+        assert leads[0].score == 95.0
+

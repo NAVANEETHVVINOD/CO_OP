@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Co-Op Loading</title>
+    <style>
+        body {
+            background-color: #0c0c0c;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loader"></div>
+    <h1>Launching Co-Op Autonomous OS...</h1>
+    <p>Connecting to backend services...</p>
+    <script>
+        // Redirect to the dashboard once it's likely ready
+        // In a real app, we'd poll the health endpoint
+        setTimeout(() => {
+            window.location.href = "http://localhost:3000";
+        }, 3000);
+    </script>
+</body>
+</html>

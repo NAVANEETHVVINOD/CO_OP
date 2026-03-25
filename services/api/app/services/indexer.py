@@ -12,6 +12,11 @@ async def upsert_document_chunks_to_qdrant(tenant_id: uuid.UUID, document_uuid: 
     if not chunks_text:
         return
 
+    if not qdrant:
+        # TODO: Implement pgvector fallback
+        print("Qdrant is disabled. Skipping vector indexing.")
+        return
+
     # Generate dense embeddings (batch)
     dense_embeddings = await embedder.embed_batch(chunks_text)
     

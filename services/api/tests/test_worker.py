@@ -5,10 +5,10 @@ def test_worker_settings_loads():
     
     assert WorkerSettings.functions is not None
     assert WorkerSettings.cron_jobs is not None
-    assert len(WorkerSettings.cron_jobs) == 3
+    assert len(WorkerSettings.cron_jobs) == 5
     
     # Check that they match our intended cron
-    job_names = [cj.coroutine_name for cj in WorkerSettings.cron_jobs]
-    assert "cron_system_monitor" in job_names
-    assert "cron_lead_scout" in job_names
-    assert "cron_morning_brief" in job_names
+    job_names = [cj.coroutine.__name__ if hasattr(cj, "coroutine") else cj.func.__name__ for cj in WorkerSettings.cron_jobs]
+    assert "system_monitor_task" in job_names
+    assert "lead_scout_task" in job_names
+    assert "morning_brief_task" in job_names

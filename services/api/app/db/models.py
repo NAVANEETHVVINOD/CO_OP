@@ -23,6 +23,10 @@ class Tenant(Base):
     audit_events: Mapped[List["AuditEvent"]] = relationship(back_populates="tenant")
     cost_events: Mapped[List["CostEvent"]] = relationship(back_populates="tenant")
     leads: Mapped[List["Lead"]] = relationship(back_populates="tenant")
+    projects: Mapped[List["Project"]] = relationship(back_populates="tenant")
+    invoices: Mapped[List["Invoice"]] = relationship(back_populates="tenant")
+    client_memories: Mapped[List["ClientMemory"]] = relationship(back_populates="tenant")
+    approvals: Mapped[List["Approval"]] = relationship(back_populates="tenant")
 
 class User(Base):
     __tablename__ = "users"
@@ -153,6 +157,7 @@ class Lead(Base):
     found_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     tenant: Mapped["Tenant"] = relationship(back_populates="leads")
+    projects: Mapped[List["Project"]] = relationship(back_populates="lead")
 
 
 class SystemSetting(Base):
@@ -162,3 +167,113 @@ class SystemSetting(Base):
     key: Mapped[str] = mapped_column(String(255), primary_key=True)
     value: Mapped[Dict[str, Any]] = mapped_column(JSON().with_variant(JSONB, "postgresql"), default=dict)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+
+# ─── Stage 3 Models ────────────────────────────────────────────────
+
+class ClientMemory(Base):
+    """Short-term and long-term memory about clients/leads."""
+    __tablename__ = "client_memory"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"))
+    client_id: Mapped[str] = mapped_column(String(255), index=True) # e.g. "upwork:username" or email
+    memory: Mapped[Dict[str, Any]] = mapped_column(JSON().with_variant(JSONB, "postgresql"), default=dict)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    tenant: Mapped["Tenant"] = relationship(back_populates="client_memories")
+
+
+class Project(Base):
+    """Ongoing work engagements."""
+    __tablename__ = "projects"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"))
+    lead_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("leads.id"), nullable=True)
+    title: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(50), default="active") # active, completed, paused
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    tenant: Mapped["Tenant"] = relationship(back_populates="projects")
+    lead: Mapped["Lead | None"] = relationship(back_populates="projects")
+    milestones: Mapped[List["Milestone"]] = relationship(back_populates="project")
+    invoices: Mapped[List["Invoice"]] = relationship(back_populates="project")
+
+
+class Milestone(Base):
+    """Specific goals within a project."""
+    __tablename__ = "milestones"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"))
+    title: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str] = mapped_column(Text, default="")
+    amount: Mapped[float] = mapped_column(Float, default=0.0)
+    due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(50), default="pending") # pending, completed
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    project: Mapped["Project"] = relationship(back_populates="milestones")
+
+
+class Invoice(Base):
+    """Financial requests for projects."""
+    __tablename__ = "invoices"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"))
+    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"))
+    amount: Mapped[float] = mapped_column(Float)
+    currency: Mapped[str] = mapped_column(String(10), default="USD")
+    status: Mapped[str] = mapped_column(String(50), default="draft") # draft, sent, paid, overdue
+    due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    tenant: Mapped["Tenant"] = relationship(back_populates="invoices")
+    project: Mapped["Project"] = relationship(back_populates="invoices")
+
+
+class PromptVersion(Base):
+    """Versioning for agent system prompts."""
+    __tablename__ = "prompt_versions"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    agent_name: Mapped[str] = mapped_column(String(100), index=True)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    prompt_text: Mapped[str] = mapped_column(Text)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Approval(Base):
+    """General HITL queue for asynchronous agent actions."""
+    __tablename__ = "approvals"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"))
+    risk_level: Mapped[str] = mapped_column(String(20), default="LOW") # LOW, MEDIUM, HIGH, CRITICAL
+    entity_type: Mapped[str] = mapped_column(String(50)) # proposal, invoice, outreach
+    entity_id: Mapped[uuid.UUID] = mapped_column() # ID of the related object (Lead, Project, etc.)
+    data: Mapped[Dict[str, Any]] = mapped_column(JSON().with_variant(JSONB, "postgresql"), default=dict)
+    status: Mapped[str] = mapped_column(String(50), default="pending") # pending, approved, rejected
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    tenant: Mapped["Tenant"] = relationship(back_populates="approvals")
+
+    @property
+    def action_type(self) -> str:
+        return self.entity_type.upper()
+
+    @property
+    def description(self) -> str:
+        if self.entity_type == "proposal":
+            return f"Submit proposal for {self.data.get('lead_title', 'unknown lead')}"
+        if self.entity_type == "invoice":
+            return f"Send invoice for ${self.data.get('amount', '0.00')}"
+        return f"Unknown action: {self.entity_type}"
+
+    @property
+    def proposed_by(self) -> str:
+        return self.data.get("agent_name", "Autonomous Agent")

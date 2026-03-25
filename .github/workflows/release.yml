@@ -1,0 +1,87 @@
+name: Release Co-Op OS v1.0
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish-cli:
+    name: Publish CLI to PyPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build CLI
+        run: |
+          cd cli
+          pip install build
+          python -m build
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-dist
+          path: cli/dist/
+
+  build-desktop:
+    name: Build Desktop App
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, ubuntu-22.04, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: install pnpm
+        run: npm install -g pnpm
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: install desktop dependencies
+        run: |
+          cd apps/desktop
+          pnpm install
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__ # the action will replace this with actual version
+          releaseName: "Co-Op v__VERSION__"
+          releaseBody: "Automated release from GitHub Actions."
+          releaseDraft: true
+          prerelease: false
+          args: --manifest apps/desktop/src-tauri/Cargo.toml
+
+  create-release:
+    name: Finalize GitHub Release
+    needs: [publish-cli, build-desktop]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download CLI Dist
+        uses: actions/download-artifact@v4
+        with:
+          name: cli-dist
+          path: cli-dist/
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            cli-dist/*
+            install.sh
+            install.ps1
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

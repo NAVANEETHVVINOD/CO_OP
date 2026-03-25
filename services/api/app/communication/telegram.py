@@ -8,7 +8,7 @@ import asyncio
 from typing import Optional
 
 from telegram import Bot, Update
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
 
 from app.config import get_settings
 
@@ -130,12 +130,81 @@ async def cmd_panic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def cmd_approve(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle /approve — approve pending HITL actions."""
-    await update.message.reply_text(
-        "✅ No pending approvals.\n"
-        "_HITL approval system will be active in Stage 3._",
-        parse_mode="Markdown",
-    )
+    """Handle /approve — list pending HITL actions with buttons."""
+    from app.db.session import AsyncSessionLocal
+    from app.db.models import Approval
+    from sqlalchemy import select
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(Approval).where(Approval.status == "pending").order_by(Approval.created_at.asc())
+        )
+        approvals = result.scalars().all()
+
+    if not approvals:
+        await update.message.reply_text("✅ No pending approvals at the moment.")
+        return
+
+    for appr in approvals:
+        keyboard = [
+            [
+                InlineKeyboardButton("✅ Approve", callback_data=f"appr_{appr.id}_yes"),
+                InlineKeyboardButton("❌ Reject", callback_data=f"appr_{appr.id}_no"),
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        # Format the data display
+        summary = appr.data.get("summary") or appr.data.get("subject") or "No details"
+        
+        msg = (
+            f"📋 *Pending Approval*\n"
+            f"ID: `{appr.id}`\n"
+            f"Type: `{appr.entity_type}`\n"
+            f"Risk: `{appr.risk_level}`\n\n"
+            f"*Content Summary:*\n{summary}"
+        )
+        await update.message.reply_text(msg, reply_markup=reply_markup, parse_mode="Markdown")
+
+
+async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle approval/rejection button clicks."""
+    query = update.callback_query
+    await query.answer()
+    
+    data = query.data
+    if not data or not data.startswith("appr_"):
+        return
+
+    _, approval_id, action = data.split("_")
+    
+    from app.db.session import AsyncSessionLocal
+    from app.db.models import Approval
+    from sqlalchemy import select
+
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Approval).where(Approval.id == approval_id))
+        appr = result.scalar_one_or_none()
+        
+        if not appr:
+            await query.edit_message_text("❌ Error: Approval request not found.")
+            return
+
+        if action == "yes":
+            appr.status = "approved"
+            msg = "✅ Action approved and executed."
+            
+            # Trigger execution logic (Stage 3 Outreach simulated)
+            if appr.entity_type == "proposal":
+                from app.agent.outreach_manager import submit_outreach
+                await submit_outreach(appr.entity_id, appr.data)
+        else:
+            appr.status = "rejected"
+            msg = "❌ Action rejected."
+
+        await session.commit()
+        await query.edit_message_text(f"{query.message.text}\n\n{msg}")
 
 
 async def cmd_budget(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -210,6 +279,7 @@ async def start_telegram_bot() -> None:
     _bot_app.add_handler(CommandHandler("approve", cmd_approve))
     _bot_app.add_handler(CommandHandler("budget", cmd_budget))
     _bot_app.add_handler(CommandHandler("help", cmd_help))
+    _bot_app.add_handler(CallbackQueryHandler(handle_callback))
 
     # Initialize and start polling
     await _bot_app.initialize()

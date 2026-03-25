@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 @pytest.mark.asyncio
 async def test_get_settings_hardware(async_client: AsyncClient):
-    with patch("app.routers.settings.detect_startup_hardware_tier") as mock_detect:
+    with patch("app.core.hardware_detector.assign_tier") as mock_detect:
         mock_detect.return_value = "TEAM"
         
         response = await async_client.get("/v1/settings/hardware")

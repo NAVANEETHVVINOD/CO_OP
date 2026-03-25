@@ -1,0 +1,134 @@
+# .github/workflows/ci.yml
+#
+# Main CI Workflow — Co-Op Platform
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# SECURITY: Every third-party `uses:` action is pinned to an IMMUTABLE commit
+# SHA, not a version tag. Tags can be force-pushed (that's how the Trivy and
+# KICS supply chain attacks in March 2026 worked). SHAs cannot be changed.
+#
+# To update an action:
+#   1. Go to the action's GitHub Releases page.
+#   2. Click the release → click the commit SHA link → copy the full SHA.
+#   3. Update both the SHA and the human-readable comment on the same line.
+#   4. Submit as a PR so it gets reviewed.
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+permissions:
+  contents: read
+
+jobs:
+
+  # ── Python: lint + test ────────────────────────────────────────────────────
+  python-ci:
+    name: Python lint & test
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: services/api
+
+    steps:
+      - name: Checkout
+        # actions/checkout @ v4.1.7
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Set up Python 3.12
+        # actions/setup-python @ v5.1.1
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Lint with ruff
+        run: ruff check .
+
+      - name: Type-check with mypy
+        run: mypy .
+
+      - name: Run tests
+        run: pytest --cov=. --cov-report=xml -q
+
+      - name: Upload coverage
+        # actions/upload-artifact @ v4.3.4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        with:
+          name: python-coverage
+          path: services/api/coverage.xml
+          retention-days: 7
+
+  # ── Node: lint + build ─────────────────────────────────────────────────────
+  node-ci:
+    name: Node.js lint & build
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Set up pnpm
+        # pnpm/action-setup @ v4.0.0
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
+        with:
+          version: "9.4.0"
+
+      - name: Set up Node.js 20
+        # actions/setup-node @ v4.0.3
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+
+  # ── Docker: build & scan ───────────────────────────────────────────────────
+  docker-build:
+    name: Docker build & Trivy scan
+    runs-on: ubuntu-24.04
+    needs: [python-ci, node-ci]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Set up Docker Buildx
+        # docker/setup-buildx-action @ v3.4.0
+        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb
+
+      - name: Build API image
+        # docker/build-push-action @ v6.2.0
+        uses: docker/build-push-action@15560696de5e7d980e5c1c1d6d5a20c3f0cf5c6c
+        with:
+          context: ./services/api
+          push: false
+          tags: co-op/api:ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          load: true
+
+      - name: Scan with Trivy
+        # aquasecurity/trivy-action @ v0.35.0 — SHA-PINNED
+        # NEVER use @master or a floating version tag here.
+        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8
+        with:
+          image-ref: "co-op/api:ci-${{ github.sha }}"
+          format: "table"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+          ignore-unfixed: true

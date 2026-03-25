@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import health, auth, documents, search, chat, conversations, approvals, credits, settings
+from .routers import health, auth, documents, search, chat, conversations, approvals, credits, settings, projects, invoices
 from .db.session import AsyncSessionLocal, engine
 from .db.models import Base, Tenant, User
 from .core.security import get_password_hash
@@ -18,6 +18,8 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from asgi_correlation_id import CorrelationIdMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from .core.rate_limit import limiter
 
@@ -109,10 +111,20 @@ async def lifespan(app: FastAPI):
 
 setup_logging()
 
+app_settings = get_settings()
+if app_settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=app_settings.SENTRY_DSN,
+        integrations=[FastApiIntegration()],
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+        environment=app_settings.ENVIRONMENT,
+    )
+
 app = FastAPI(
     title="Co-Op API",
     description="Main Control Plane for Co-Op AI OS",
-    version="0.2.0",
+    version="0.3.0",
     lifespan=lifespan
 )
 
@@ -128,7 +140,7 @@ Instrumentator().instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -144,3 +156,6 @@ app.include_router(approvals.router)
 # Stage 2 routers
 app.include_router(credits.router)
 app.include_router(settings.router)
+# Stage 3 routers
+app.include_router(projects.router)
+app.include_router(invoices.router)

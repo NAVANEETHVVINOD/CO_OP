@@ -1,8 +1,48 @@
-# Co-Op — Autonomous Company OS
+# Co-Op: Autonomous Company OS (v1.0) 🚀
 
-> AI workforce that runs your freelance business.
-> Agents find clients, write proposals, deliver work, and handle invoicing — with your approval on every important action.
+Co-Op is the world's first fully autonomous company operating system, designed to scout leads, write proposals, manage projects, and handle finance with human-in-the-loop oversight.
 
+# 🌟 Co-Op Autonomous Company OS v1.0.0 🌟
+
+Co-Op is an AI-native operating system designed to run an autonomous company. It integrates lead scouting, proposal writing, and financial management into a seamless, high-performance platform.
+
+---
+
+## 🚀 Quick Start (One-Click Install)
+
+Get up and running in minutes on any platform.
+
+### Windows (PowerShell)
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/navaneethvvinod/co_op/main/install.ps1'))
+```
+
+### Linux & macOS (Bash)
+```bash
+curl -sSL https://raw.githubusercontent.com/navaneethvvinod/co_op/main/install.sh | bash
+```
+
+---
+
+## 📚 Documentation
+
+Detailed guides for every stage of your journey:
+
+- [📥 **Installation Guide**](docs/INSTALL.md) - Platform-specific notes and manual setup.
+- [📖 **User Guide**](docs/USAGE.md) - How to use the CLI, desktop app, and agents.
+- [🛠️ **Development Guide**](docs/DEVELOPMENT.md) - Contributing and extending Co-Op.
+
+---
+
+## 📦 Features
+
+- **Lead Scout**: AI agent that discovers business opportunities.
+- **Proposal Writer**: RAG-enhanced agent for high-conversion drafting.
+- **Finance Manager**: Automated invoicing and revenue tracking.
+- **Native Desktop App**: Tray controls, background monitoring, and native notifications.
+- **CLI Tool**: Powerful management from the terminal.
+- **HITL (Human-in-the-Loop)**: Review and approve all agent actions globally.
+- **Observability**: Built-in Sentry tracking and persistent diagnostic logging.
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 If you want an AI that actually does the work, not just talk about it, this is it.
@@ -270,6 +310,29 @@ pnpm install   # if you want to build frontend locally
 cd infrastructure/docker
 docker compose up -d
 ```
+
+## 🛠️ Management CLI
+
+The `coop` CLI tool is the primary way to manage your Autonomous Company OS.
+
+### Installation
+```bash
+pip install -e ./cli
+```
+
+### Usage
+- **Gateway Control**:
+  - `coop gateway start` – Start all services
+  - `coop gateway stop` – Stop all services
+  - `coop gateway status` – Check health
+- **Diagnostics**:
+  - `coop doctor` – Run system check
+- **Billing & HITL**:
+  - `coop approve <approval_id>` – Approve a queued action
+- **Verification**:
+  - `coop test` – Run the E2E "Gold Path" verification suite
+- **Backup**:
+  - `coop backup create` – Create a system snapshot
 
 ### Windows (WSL2)
 We strongly recommend running Co-Op inside WSL2 for the best experience. Follow the [Windows guide](docs/windows-guide.md).

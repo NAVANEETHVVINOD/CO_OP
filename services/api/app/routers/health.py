@@ -81,6 +81,8 @@ async def _check_litellm() -> str:
 
 @router.get("/health")
 async def check_health():
+    from app.config import get_settings
+    settings = get_settings()
     pg = await _check_postgres()
     rd = await _check_redis()
     qd = await _check_qdrant()
@@ -95,6 +97,8 @@ async def check_health():
         "minio": mo,
         "ollama": ol,
         "litellm": ll,
+        "simulation_mode": settings.COOP_SIMULATION_MODE,
+        "version": "0.3.0"
     }
 
 

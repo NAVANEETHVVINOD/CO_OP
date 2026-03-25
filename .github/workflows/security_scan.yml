@@ -1,0 +1,242 @@
+# .github/workflows/security_scan.yml
+#
+# Security Scanning Workflow
+# Runs on every push and pull request to catch supply-chain issues early.
+#
+# Covers:
+#   - pip-audit  — Python dependency CVE scanning (OSV + PyPI Advisory DB)
+#   - pnpm audit — Node.js dependency CVE scanning
+#   - Trivy      — Container image vulnerability scanning (SHA-pinned)
+#   - .pth file check — Detects malicious Python path-hook files in wheels
+#   - LiteLLM version gate — Blocks 1.82.7/8 from ever being re-introduced
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# SECURITY: All third-party actions are pinned to IMMUTABLE commit SHAs.
+# Tags like @v3 can be force-pushed by an attacker (CVE-2026-33634 vector).
+# To update an action:
+#   1. Find the new commit SHA on the action's GitHub releases page.
+#   2. Update the sha below AND the human-readable comment beside it.
+#   3. Open a PR so the change is reviewed.
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Security Scan
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+  # Also run on a daily schedule to catch newly published CVEs
+  schedule:
+    - cron: "0 6 * * *"   # 06:00 UTC daily
+
+permissions:
+  contents: read            # least privilege — read-only by default
+  security-events: write    # needed to upload SARIF results to GitHub Security
+
+jobs:
+
+  # ── 1. Python dependency audit ─────────────────────────────────────────────
+  pip-audit:
+    name: pip-audit (Python CVE scan)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: services/api
+
+    steps:
+      - name: Checkout repository
+        # actions/checkout @ v4.1.7
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Set up Python
+        # actions/setup-python @ v5.1.1
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
+        with:
+          python-version: "3.12"
+
+      - name: Install pip-audit
+        run: pip install pip-audit>=2.7.0
+
+      - name: Install project dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run pip-audit
+        run: |
+          pip-audit \
+            --format json \
+            --output pip-audit-report.json || true
+          pip-audit
+
+      - name: Upload pip-audit report
+        if: always()
+        # actions/upload-artifact @ v4.3.4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        with:
+          name: pip-audit-report
+          path: services/api/pip-audit-report.json
+          retention-days: 30
+
+  # ── 2. Node.js dependency audit ───────────────────────────────────────────
+  pnpm-audit:
+    name: pnpm audit (Node CVE scan)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Set up pnpm
+        # pnpm/action-setup @ v4.0.0
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
+        with:
+          version: "9.4.0"
+
+      - name: Set up Node.js
+        # actions/setup-node @ v4.0.3
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit
+        run: |
+          pnpm audit \
+            --audit-level moderate \
+            --json > pnpm-audit-report.json || true
+          pnpm audit --audit-level moderate
+
+      - name: Upload pnpm audit report
+        if: always()
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        with:
+          name: pnpm-audit-report
+          path: pnpm-audit-report.json
+          retention-days: 30
+
+  # ── 3. Container image scan ────────────────────────────────────────────────
+  trivy-scan:
+    name: Trivy (container CVE scan)
+    runs-on: ubuntu-24.04
+    needs: [pip-audit, pnpm-audit]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Build API image for scanning
+        run: docker build -t co-op/api:scan-target ./services/api
+
+      - name: Run Trivy on API image
+        # aquasecurity/trivy-action @ v0.35.0
+        # SHA-pinned — DO NOT change to a floating tag.
+        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8
+        with:
+          image-ref: "co-op/api:scan-target"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+          ignore-unfixed: true
+
+      - name: Upload Trivy SARIF to GitHub Security
+        if: always()
+        # github/codeql-action/upload-sarif @ v3.25.12
+        uses: github/codeql-action/upload-sarif@23acc5c183826523de1b1a16b2b9cb22b4a19b3a
+        with:
+          sarif_file: "trivy-results.sarif"
+
+  # ── 4. Malicious .pth file detector ───────────────────────────────────────
+  pth-check:
+    name: Malicious .pth file check
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Set up Python
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
+        with:
+          python-version: "3.12"
+
+      - name: Install project dependencies
+        working-directory: services/api
+        run: pip install -e .
+
+      - name: Scan for suspicious .pth files
+        run: |
+          echo "=== Scanning for .pth files in site-packages ==="
+          SITE_PACKAGES=$(python3 -c "import site; print(site.getsitepackages()[0])")
+          PTH_FILES=$(find "$SITE_PACKAGES" -name "*.pth" 2>/dev/null || true)
+
+          if [ -z "$PTH_FILES" ]; then
+            echo "✅ No .pth files found."
+            exit 0
+          fi
+
+          echo "Found .pth files:"
+          echo "$PTH_FILES"
+
+          SUSPICIOUS=0
+          for f in $PTH_FILES; do
+            if grep -qEi "subprocess|exec|eval|base64|__import__|os\.system|socket|urllib|requests|curl" "$f"; then
+              echo "🚨 SUSPICIOUS .pth file detected: $f"
+              echo "--- Contents ---"
+              cat "$f"
+              echo "---"
+              SUSPICIOUS=$((SUSPICIOUS + 1))
+            fi
+          done
+
+          if [ "$SUSPICIOUS" -gt 0 ]; then
+            echo ""
+            echo "❌ $SUSPICIOUS suspicious .pth file(s) found. This may indicate a supply-chain attack."
+            exit 1
+          fi
+
+          echo "✅ All .pth files look clean."
+
+  # ── 5. LiteLLM version gate ────────────────────────────────────────────────
+  litellm-version-gate:
+    name: LiteLLM version gate (block 1.82.7 / 1.82.8)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Check pyproject.toml does not pin compromised versions
+        run: |
+          echo "=== Checking pyproject.toml for compromised litellm versions ==="
+
+          BLOCKED_VERSIONS=("1.82.7" "1.82.8")
+
+          for VERSION in "${BLOCKED_VERSIONS[@]}"; do
+            if grep -q "litellm==${VERSION}" services/api/pyproject.toml; then
+              echo "🚨 BLOCKED: litellm==${VERSION} is a compromised version (CVE-2026-33634)."
+              echo "   Update to litellm==1.82.6 or >=1.82.9."
+              exit 1
+            fi
+          done
+
+          echo "✅ No compromised litellm versions found in pyproject.toml."
+
+      - name: Check docker-compose.yml does not use compromised LiteLLM image
+        run: |
+          echo "=== Checking docker-compose.yml for compromised litellm image tags ==="
+
+          BLOCKED_TAGS=("v1.82.7" "v1.82.8" "main-latest" "latest")
+
+          for TAG in "${BLOCKED_TAGS[@]}"; do
+            if grep -q "litellm:${TAG}" infrastructure/docker/docker-compose.yml; then
+              echo "🚨 BLOCKED: litellm:${TAG} is unsafe."
+              echo "   Use ghcr.io/berriai/litellm:v1.82.6 (pinned clean version)."
+              exit 1
+            fi
+          done
+
+          echo "✅ docker-compose.yml uses a safe litellm image tag."
