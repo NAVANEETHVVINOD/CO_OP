@@ -101,7 +101,7 @@ services:
 
   litellm:
     # PINNED — do NOT use main-latest. See security note at top of file.
-    image: litellm/litellm:1.82.6
+    image: ghcr.io/berriai/litellm:main-stable
     ports:
       - "4000:4000"
     volumes:

@@ -41,7 +41,7 @@ dependencies = [
     "litellm==1.82.6",
     "alembic>=1.13.1",
     "sentry-sdk[fastapi]>=2.0.0",
-    "pygments>=2.20.0",
+    "pygments>=2.19.0",
 ]
 
 [project.optional-dependencies]
