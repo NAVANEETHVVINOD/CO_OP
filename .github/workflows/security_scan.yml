@@ -86,11 +86,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
 
-      - name: Set up pnpm
-        # pnpm/action-setup @ v4.0.0
-        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
-        with:
-          version: "9.4.0"
 
       - name: Set up Node.js
         # actions/setup-node @ v4.0.3
