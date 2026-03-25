@@ -8,7 +8,7 @@
 #   floating tag. Before bumping the version, manually verify the new wheel
 #   does not contain litellm_init.pth:
 #
-#     docker run --rm ghcr.io/berriai/litellm:<new-version> \
+#     docker run --rm litellm/litellm:<new-version> \
 #       find /usr/local/lib -name "*.pth" | xargs grep -l "subprocess" 2>/dev/null
 #
 #   All images are pinned to exact minor versions. All containers are hardened
@@ -101,7 +101,7 @@ services:
 
   litellm:
     # PINNED — do NOT use main-latest. See security note at top of file.
-    image: ghcr.io/berriai/litellm:v1.82.6
+    image: litellm/litellm:1.82.6
     ports:
       - "4000:4000"
     volumes:
