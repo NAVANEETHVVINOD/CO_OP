@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any, Union, Optional
 import jwt
+import hashlib
 from passlib.context import CryptContext
 from fastapi import HTTPException
 import re
@@ -12,6 +13,13 @@ settings = get_settings()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = "HS256"
+
+def normalize_password(password: str) -> str:
+    """
+    Pre-hash password using SHA256 to avoid bcrypt's 72-byte limit.
+    This is a standard practice for handling long passwords with bcrypt.
+    """
+    return hashlib.sha256(password.encode()).hexdigest()
 
 def create_access_token(subject: Union[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     if expires_delta:
@@ -34,10 +42,12 @@ def create_refresh_token(subject: Union[str, Any], expires_delta: Optional[timed
     return encoded_jwt
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    normalized = normalize_password(plain_password)
+    return pwd_context.verify(normalized, hashed_password)
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    normalized = normalize_password(password)
+    return pwd_context.hash(normalized)
 
 def validate_password(password: str) -> None:
     if len(password) < 8:

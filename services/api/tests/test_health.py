@@ -7,6 +7,7 @@ async def test_health_check(async_client):
     data = response.json()
     # Accept both "ok" and "degraded" status (degraded when external services are down)
     assert data["status"] in ["ok", "degraded"]
-    assert "postgres" in data
-    assert "redis" in data
-    assert "qdrant" in data
+    assert "services" in data
+    assert "postgres" in data["services"]
+    assert "redis" in data["services"]
+    assert "qdrant" in data["services"]
