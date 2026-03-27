@@ -1,5 +1,4 @@
 import typer
-import os
 import secrets
 import string
 from pathlib import Path
@@ -13,7 +12,6 @@ ROOT_DIR = Path(__file__).parent.parent.parent.parent
 ENV_PATH = ROOT_DIR / ".env"
 
 import httpx
-from ..main import app as main_app # To run start command
 
 @app.command()
 def setup():
@@ -79,7 +77,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
         console.print("[blue]Starting gateway...[/blue]")
         from .gateway import start
         start()
-        console.print(f"\n[bold green]✅ Gateway started! Access your dashboard at http://localhost:3000[/bold green]")
+        console.print("\n[bold green]✅ Gateway started! Access your dashboard at http://localhost:3000[/bold green]")
     else:
         console.print("\n[bold blue]Next steps:[/bold blue]")
         console.print("1. Run [bold green]coop gateway start[/bold green] to launch services.")

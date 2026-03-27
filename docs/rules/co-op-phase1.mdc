@@ -5,7 +5,8 @@ alwaysApply: true
 # Co-Op Growth Stages — Solo Developer Edition
 
 > Replaces the old Phase 0-4 enterprise approach.
-> See `docs/CO_OP_SOLO_DEVELOPER_ARCHITECTURE.md` for full details.
+> See `docs/archive/2026-03-27_CO_OP_SOLO_DEVELOPER_ARCHITECTURE.md` for historical context.
+> Current architecture documented in `.kiro/steering/architecture.md`
 
 ## The 4 Growth Stages
 
@@ -89,7 +90,7 @@ STAGE 4 (Month 5+):  Full v5.3 — When revenue justifies complexity.
 | 50+ clients need graph queries | Neo4j |
 | Revenue > £10k, need scale | Traefik + multi-node |
 
-See `docs/stage4_implementation.md` for full trigger list.
+See `docs/stages/phase-3/stage4_implementation.md` for full trigger list.
 
 ---
 
@@ -117,7 +118,7 @@ See `docs/stage4_implementation.md` for full trigger list.
 
 ## Implementation Guides
 
-- `docs/stage1_implementation.md` — Foundation setup + bug fixes
-- `docs/stage2_implementation.md` — LLM, ARQ, Telegram, Lead Scout
-- `docs/stage3_implementation.md` — Agents, proposals, revenue ops
-- `docs/stage4_implementation.md` — Scaling triggers + decision framework
+- `docs/stages/phase-0/stage1_implementation.md` — Foundation setup + bug fixes
+- `docs/stages/phase-1/stage2_implementation.md` — LLM, ARQ, Telegram, Lead Scout
+- `docs/stages/phase-2/stage3_implementation.md` — Agents, proposals, revenue ops
+- `docs/stages/phase-3/stage4_implementation.md` — Scaling triggers + decision framework

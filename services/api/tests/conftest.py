@@ -47,12 +47,15 @@ _test_env = {
     "REDIS_URL":          "redis://localhost:6379",
     "USE_QDRANT":         "True",
     "QDRANT_URL":         "http://localhost:6333",
-    "MINIO_URL":          "localhost:9000",
+    "MINIO_URL":          "http://localhost:9000",
     "MINIO_ROOT_USER":    "minio",
     "MINIO_ROOT_PASSWORD":"minio123",
     "SECRET_KEY":         "super-secret",
     "DB_PASS":            "test",
     "LITELLM_URL":        "http://localhost:4000",
+    "OLLAMA_URL":         "http://localhost:11434",
+    "API_BASE_URL":       "http://localhost:8000",
+    "FRONTEND_URL":       "http://localhost:3000",
     "ENVIRONMENT":        "local",
 }
 for k, v in _test_env.items():

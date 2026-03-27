@@ -17,8 +17,8 @@ Before starting ANY work, scan these files:
 1. **This file** (`PROJECT.mdc`) — Project identity, current state
 2. **`co-op-solo-guidelines.mdc`** — Stage constraints, technology matrix
 3. **`co-op-critical-constraints.mdc`** — Hard rules, never violate
-4. **`docs/CO_OP_SOLO_TASKS_UPDATED.md`** — 83-task checklist
-5. **The stage guide** for the current stage (`docs/stage[X]_implementation.md`)
+4. **`docs/stages/phase-0/TASKS.md`** — Current phase task list
+5. **The stage guide** for the current stage (`docs/stages/phase-0/stage1_implementation.md`)
 6. **`co-op-api-contracts.mdc`** — API endpoints, database schema
 7. **`services/api/app/config.py`** — Backend configuration
 8. **`infrastructure/docker/docker-compose.yml`** — Service configuration

@@ -23,8 +23,9 @@ RUN uv pip install torch --index-url https://download.pytorch.org/whl/cpu && \
     uv pip install sentence-transformers>=2.6.1 alembic>=1.13.1
 
 COPY pyproject.toml .
+COPY app ./app
 RUN uv pip install pytest pytest-asyncio pytest-mock aiosqlite bcrypt==4.0.1 && \
-    uv pip install ".[dev]"
+    uv pip install .
 
 # --- Stage 2: Final Runtime ---
 FROM python:3.12-slim

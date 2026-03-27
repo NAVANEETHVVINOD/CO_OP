@@ -10,6 +10,10 @@ console = Console()
 
 BACKUP_DIR = Path("backups")
 
+# Configurable compose path
+DEFAULT_COMPOSE = Path(__file__).parent.parent.parent.parent / "infrastructure" / "docker" / "docker-compose.yml"
+COMPOSE_FILE = Path(os.getenv("COOP_COMPOSE_PATH", str(DEFAULT_COMPOSE)))
+
 @app.command()
 def create():
     """Create a full system backup (Postgres, Qdrant, MinIO)."""

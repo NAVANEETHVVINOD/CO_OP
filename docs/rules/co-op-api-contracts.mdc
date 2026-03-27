@@ -11,10 +11,11 @@ alwaysApply: true
 |---------|------|-----|
 | FastAPI Backend | 8000 | http://localhost:8000 |
 | Next.js Frontend | 3000 | http://localhost:3000 |
-| PostgreSQL | 5432 | postgres://coop:${DB_PASS}@localhost:5432/coop |
+| PostgreSQL | 5433 (mapped from 5432) | postgres://coop:${DB_PASS}@localhost:5433/coop |
 | Redis | 6379 | redis://localhost:6379 |
 | Qdrant | 6333 | http://localhost:6333 |
 | MinIO API | 9000 | http://localhost:9000 |
+| MinIO Console | 9001 | http://localhost:9001 |
 
 ### Stage 2 (add these)
 | Service | Port | URL |
@@ -30,7 +31,7 @@ alwaysApply: true
 | LLM Guard | 8060 | http://localhost:8060 |
 | Communication | 8010 | http://localhost:8010 |
 
-### Stage 4 (add per trigger — see stage4_implementation.md)
+### Stage 4 (add per trigger — see docs/stages/phase-3/stage4_implementation.md)
 
 **Inside Docker, use service names (not localhost):**
 `DATABASE_URL=postgresql+asyncpg://coop:${DB_PASS}@postgres:5432/coop`

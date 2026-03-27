@@ -9,6 +9,9 @@ from rich.panel import Panel
 app = typer.Typer(help="System diagnostics and environment check")
 console = Console()
 
+# Configurable API URL
+API_URL = os.getenv("COOP_API_URL", "http://localhost:8000")
+
 @app.command()
 def check():
     """Run full system diagnostics."""
@@ -36,17 +39,18 @@ def check():
     # 3. Check Environment Variables
     root_env = os.path.join(os.getcwd(), ".env")
     if os.path.exists(root_env):
-        console.print(f"[green]OK[/green] Root .env file found.")
+        console.print("[green]OK[/green] Root .env file found.")
     else:
-        console.print(f"[red]ERROR[/red] Root .env file MISSING. Run setup first.")
+        console.print("[red]ERROR[/red] Root .env file MISSING. Run setup first.")
 
     # 4. Check API Connectivity
     try:
         import httpx
         with httpx.Client(timeout=2.0) as client:
-            client.get("http://localhost:8000/health")
-            console.print("[green]OK[/green] Backend API (localhost:8000) is reachable.")
+            client.get(f"{API_URL}/health")
+            console.print(f"[green]OK[/green] Backend API ({API_URL}) is reachable.")
     except:
-        console.print("[yellow]WARN[/yellow] Backend API unreachable (gateway might be stopped).")
+        console.print(f"[yellow]WARN[/yellow] Backend API ({API_URL}) unreachable (gateway might be stopped).")
+        console.print("[dim]Set COOP_API_URL environment variable to override[/dim]")
 
     console.print("\n[bold green]Doctor check complete.[/bold green]")

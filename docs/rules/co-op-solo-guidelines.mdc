@@ -104,8 +104,8 @@ Never add Stage 4 services preemptively.
 
 1. `docs/rules/co-op-solo-guidelines.mdc` — THIS FILE (stage constraints)
 2. `docs/rules/co-op-critical-constraints.mdc` — hard rules
-3. `docs/CO_OP_SOLO_TASKS_UPDATED.md` — current task list
-4. `docs/stage[X]_implementation.md` — current stage guide
+3. `docs/stages/phase-0/TASKS.md` — current task list
+4. `docs/stages/phase-X/stageX_implementation.md` — current stage guide
 5. `docs/rules/co-op-api-contracts.mdc` — API endpoints + schema
 6. `services/api/app/config.py` — all configuration
 7. `infrastructure/docker/docker-compose.yml` — service definitions

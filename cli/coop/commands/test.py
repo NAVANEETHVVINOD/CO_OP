@@ -1,6 +1,5 @@
 import typer
 import subprocess
-import os
 from pathlib import Path
 from rich.console import Console
 

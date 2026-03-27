@@ -36,8 +36,10 @@ async def run_morning_brief() -> None:
     # 2. System health
     try:
         import httpx
+        from app.config import get_settings
+        settings = get_settings()
         async with httpx.AsyncClient() as client:
-            resp = await client.get("http://localhost:8000/health", timeout=5.0)
+            resp = await client.get(f"{settings.API_BASE_URL}/health", timeout=5.0)
             if resp.status_code == 200:
                 data = resp.json()
                 healthy = sum(1 for k, v in data.items() if k != "status" and v == "ok")

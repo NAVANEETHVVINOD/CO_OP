@@ -25,6 +25,14 @@ on:
 permissions:
   contents: read
 
+env:
+  # All configuration from repository variables
+  OLLAMA_URL: ${{ vars.OLLAMA_URL || 'http://ollama:11434' }}
+  API_BASE_URL: ${{ vars.API_BASE_URL || 'http://co-op-api:8000' }}
+  FRONTEND_URL: ${{ vars.FRONTEND_URL || 'http://co-op-web:3000' }}
+  DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY || 'ghcr.io' }}
+  DOCKER_IMAGE_PREFIX: ${{ vars.DOCKER_IMAGE_PREFIX || 'navaneethvvinod/co-op' }}
+
 jobs:
 
   # ── Python: lint + test ────────────────────────────────────────────────────
@@ -56,6 +64,20 @@ jobs:
         run: mypy .
 
       - name: Run tests
+        env:
+          DATABASE_URL: postgresql+asyncpg://coop:${{ secrets.DB_PASS || 'testpass' }}@localhost:5432/coop_test
+          REDIS_URL: redis://localhost:6379
+          SECRET_KEY: ${{ secrets.SECRET_KEY || 'test-secret-key-min-32-chars-long' }}
+          OLLAMA_URL: ${{ env.OLLAMA_URL }}
+          API_BASE_URL: ${{ env.API_BASE_URL }}
+          FRONTEND_URL: ${{ env.FRONTEND_URL }}
+          MINIO_URL: localhost:9000
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_ROOT_PASSWORD || 'minioadmin123' }}
+          ENVIRONMENT: test
+          USE_QDRANT: false
+          COOP_SIMULATION_MODE: true
+          LOG_LEVEL: INFO
         run: pytest --cov=. --cov-report=xml -q
 
       - name: Upload coverage
@@ -96,6 +118,9 @@ jobs:
         run: pnpm lint
 
       - name: Build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ env.API_BASE_URL }}
+          NEXT_PUBLIC_ENVIRONMENT: test
         run: pnpm build
 
   # ── Docker: build & scan ───────────────────────────────────────────────────

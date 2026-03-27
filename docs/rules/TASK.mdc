@@ -4,7 +4,7 @@ alwaysApply: true
 
 # Current Task List — Quick Reference
 
-> Full task list: `docs/CO_OP_SOLO_TASKS_UPDATED.md`
+> Full task list: `docs/stages/phase-0/TASKS.md`
 > This file is a summary only. Always check the full list for "Done when" conditions.
 
 ## Current Stage: 1 — The Foundation
@@ -42,7 +42,7 @@ alwaysApply: true
 
 ## Key Implementation Guides
 
-- `docs/stage1_implementation.md` — Bug fixes, verification steps
-- `docs/stage2_implementation.md` — LLM, ARQ, Telegram, Lead Scout
-- `docs/stage3_implementation.md` — Proposals, revenue, agents
-- `docs/stage4_implementation.md` — Scaling triggers
+- `docs/stages/phase-0/stage1_implementation.md` — Bug fixes, verification steps
+- `docs/stages/phase-1/stage2_implementation.md` — LLM, ARQ, Telegram, Lead Scout
+- `docs/stages/phase-2/stage3_implementation.md` — Proposals, revenue, agents
+- `docs/stages/phase-3/stage4_implementation.md` — Scaling triggers

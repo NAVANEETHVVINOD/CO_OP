@@ -65,12 +65,12 @@ track projects, and create invoices — with human approval for every important 
 
 | Document | Purpose |
 |----------|---------|
-| `docs/CO_OP_SOLO_DEVELOPER_ARCHITECTURE.md` | Full architecture blueprint |
-| `docs/CO_OP_SOLO_TASKS_UPDATED.md` | 83-task checklist across 4 stages |
-| `docs/stage1_implementation.md` | Stage 1 guide |
-| `docs/stage2_implementation.md` | Stage 2 guide |
-| `docs/stage3_implementation.md` | Stage 3 guide |
-| `docs/stage4_implementation.md` | Stage 4 trigger guide |
+| `docs/archive/2026-03-27_CO_OP_SOLO_DEVELOPER_ARCHITECTURE.md` | Full architecture blueprint (archived) |
+| `docs/archive/2026-03-27_CO_OP_SOLO_TASKS_UPDATED.md` | 83-task checklist (archived) |
+| `docs/stages/phase-0/stage1_implementation.md` | Stage 1 guide |
+| `docs/stages/phase-1/stage2_implementation.md` | Stage 2 guide |
+| `docs/stages/phase-2/stage3_implementation.md` | Stage 3 guide |
+| `docs/stages/phase-3/stage4_implementation.md` | Stage 4 trigger guide |
 | `docs/rules/*.mdc` | AI IDE constraint files |
 
 ---

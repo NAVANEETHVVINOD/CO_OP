@@ -7,10 +7,11 @@ import structlog
 logger = structlog.get_logger(__name__)
 settings = get_settings()
 
-url = "localhost:9000" if settings.ENVIRONMENT == "local" else settings.MINIO_URL.replace("http://", "").replace("https://", "")
+# Extract hostname from MINIO_URL (remove http:// or https:// prefix)
+minio_url = settings.MINIO_URL.replace("http://", "").replace("https://", "")
 
 minio_client = Minio(
-    url,
+    minio_url,
     access_key=settings.MINIO_ROOT_USER,
     secret_key=settings.MINIO_ROOT_PASSWORD,
     secure=False

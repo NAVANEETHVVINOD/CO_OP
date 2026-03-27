@@ -6,8 +6,8 @@ alwaysApply: true
 
 ## Before Starting Any Task
 
-1. **Read `docs/PROJECT.md`** — understand current state, constraints
-2. **Read `docs/CO_OP_SOLO_TASKS_UPDATED.md`** — find the current task
+1. **Read `docs/stages/phase-0/PROJECT.md`** — understand current state, constraints
+2. **Read `docs/stages/phase-0/TASKS.md`** — find the current task
 3. **Read `docs/rules/co-op-solo-guidelines.mdc`** — stage constraints
 4. **Identify which files need to be changed** — list them before changing
 5. **Check if the change might break anything working** — if yes, ask first

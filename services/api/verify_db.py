@@ -3,8 +3,9 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 async def check():
-    url = "postgresql+asyncpg://coop:cooppassword123@localhost:5433/coop"
-    engine = create_async_engine(url)
+    from app.config import get_settings
+    settings = get_settings()
+    engine = create_async_engine(settings.DATABASE_URL)
     try:
         async with engine.connect() as conn:
             result = await conn.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name = 'conversations'"))
