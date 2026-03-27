@@ -23,7 +23,7 @@ def check():
         try:
             res = subprocess.run(["docker", "--version"], capture_output=True, text=True)
             console.print(f"[green]OK[/green] Docker found: [dim]{res.stdout.strip()}[/dim]")
-        except:
+        except Exception:
             console.print("[red]ERROR[/red] Docker is installed but daemon is not responding.")
     else:
         console.print("[red]ERROR[/red] Docker NOT found in PATH.")
@@ -49,7 +49,7 @@ def check():
         with httpx.Client(timeout=2.0) as client:
             client.get(f"{API_URL}/health")
             console.print(f"[green]OK[/green] Backend API ({API_URL}) is reachable.")
-    except:
+    except Exception:
         console.print(f"[yellow]WARN[/yellow] Backend API ({API_URL}) unreachable (gateway might be stopped).")
         console.print("[dim]Set COOP_API_URL environment variable to override[/dim]")
 

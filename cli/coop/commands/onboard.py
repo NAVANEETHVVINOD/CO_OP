@@ -4,14 +4,13 @@ import string
 from pathlib import Path
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
+import httpx
 
 app = typer.Typer(help="Interactive onboarding for Co-Op OS")
 console = Console()
 
 ROOT_DIR = Path(__file__).parent.parent.parent.parent
 ENV_PATH = ROOT_DIR / ".env"
-
-import httpx
 
 @app.command()
 def setup():

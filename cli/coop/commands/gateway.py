@@ -87,9 +87,9 @@ def status(
             # Docker ps format can be multiple lines of JSON or a single array
             try:
                 status_data["containers"] = json_lib.loads(res.stdout)
-            except:
+            except Exception:
                 # Fallback for older versions or line-delimited JSON
-                status_data["containers"] = [json_lib.loads(l) for l in res.stdout.splitlines() if l.strip()]
+                status_data["containers"] = [json_lib.loads(line) for line in res.stdout.splitlines() if line.strip()]
         else:
             console.print("[dim]Container Status:[/dim]")
             subprocess.run(["docker", "compose", "-f", str(COMPOSE_FILE), "ps"])

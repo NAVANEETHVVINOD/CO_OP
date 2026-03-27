@@ -39,13 +39,15 @@ def create():
         console.print(" - Creating Qdrant Snapshot...")
         # Simple placeholder for Stage 3
         console.print("   ⚠️ Qdrant snapshotting via API not yet implemented in CLI.")
-    except: pass
+    except Exception:
+        pass
 
     # 3. MinIO Sync
     try:
         console.print(" - Syncing MinIO artifacts...")
         # Placeholder
         console.print("   ⚠️ MinIO sync not yet implemented in CLI.")
-    except: pass
+    except Exception:
+        pass
 
     console.print(f"\n[bold green]✅ Backup stored in {BACKUP_DIR}/[/bold green]")

@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import os
 from pathlib import Path
 
 # CLI root directory (cli/)
@@ -19,8 +20,6 @@ def run_coop(args):
         text=True,
         env=env
     )
-
-import os
 
 def test_cli_help():
     res = run_coop(["--help"])
