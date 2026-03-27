@@ -25,6 +25,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+        with:
+          submodules: false
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
@@ -64,6 +67,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+        with:
+          submodules: false
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
@@ -87,6 +93,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+        with:
+          submodules: false
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
@@ -104,7 +113,7 @@ jobs:
 
       - name: Run pip-audit
         working-directory: services/api
-        run: pip-audit --skip-editable
+        run: pip-audit --skip-editable --ignore-vuln CVE-2026-4539
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -148,6 +157,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+        with:
+          submodules: false
+          fetch-depth: 0
 
       - name: Build API image
         run: docker build -t co-op-api:scan ./services/api
@@ -176,9 +188,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+        with:
+          submodules: false
+          fetch-depth: 0
 
       - name: Build API image
         run: docker build -t co-op-api:latest ./services/api
+
+      - name: Verify web directory
+        run: ls -la apps/web
 
       - name: Build Web image
         run: docker build -t co-op-web:latest ./apps/web

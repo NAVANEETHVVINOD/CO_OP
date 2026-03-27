@@ -1,21 +1,13 @@
-# Gitleaks Configuration
-# Allowlist for false positives
+title = "Gitleaks Config"
 
 [allowlist]
-description = "Allowlist for example credentials in documentation"
-
-[allowlist.regexes]
-# Example AWS keys in README.md (not real credentials)
-regexTarget = "match"
-regexes = [
-  '''AKIAIMNOJVGFDXXXE4OA''',
-  '''cafebabe:deadbeef'''
+paths = [
+  "README.md",
+  "docs/.*\\.md",
+  ".github/workflows/.*"
 ]
 
-[allowlist.paths]
-# Paths to ignore
-paths = [
-  '''README\.md''',
-  '''docs/.*\.md''',
-  '''\.github/workflows/.*'''
+regexes = [
+  "AKIAIMNOJVGFDXXXE4OA",
+  "cafebabe:deadbeef"
 ]
