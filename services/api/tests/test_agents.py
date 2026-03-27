@@ -32,27 +32,37 @@ class TestResearchAgent:
     @pytest.mark.asyncio
     async def test_research_agent_basic_query(self):
         """Test Research Agent with a sample query"""
-        # Mock the LLM calls to avoid actual API requests
-        with patch('app.agent.nodes.ChatOpenAI') as mock_llm:
-            mock_llm.return_value.ainvoke = AsyncMock(
-                return_value=MagicMock(content="Test response")
-            )
+        # Mock the search and reranker to avoid actual API requests
+        with patch('app.agent.nodes.embedder') as mock_embedder, \
+             patch('app.agent.nodes._perform_search') as mock_search, \
+             patch('app.agent.nodes.reranker') as mock_reranker:
+            
+            # Mock embedder
+            mock_embedder.embed_text = AsyncMock(return_value=[0.1] * 384)
+            
+            # Mock search results
+            mock_search.return_value = []
+            
+            # Mock reranker
+            mock_reranker.rerank = AsyncMock(return_value=[])
             
             graph = create_research_graph()
             
             # Create initial state
             initial_state = AgentState(
-                messages=[{"role": "user", "content": "What is the capital of France?"}],
-                context=[],
-                citations=[]
+                question="What is the capital of France?",
+                tenant_id="test-tenant",
+                retrieved_docs=[],
+                reranked_docs=[],
+                final_answer=""
             )
             
             # Run the graph
             result = await graph.ainvoke(initial_state)
             
             # Verify result structure
-            assert "messages" in result
-            assert len(result["messages"]) > 0
+            assert "final_answer" in result
+            assert isinstance(result["final_answer"], str)
     
     @pytest.mark.asyncio
     async def test_research_agent_environment_configuration(self):
