@@ -4,24 +4,18 @@
 [allowlist]
 description = "Allowlist for example credentials in documentation"
 
+[allowlist.regexes]
 # Example AWS keys in README.md (not real credentials)
-[[allowlist.regexes]]
-regex = '''AKIAIMNOJVGFDXXXE4OA'''
-description = "Example AWS key in documentation"
+regexTarget = "match"
+regexes = [
+  '''AKIAIMNOJVGFDXXXE4OA''',
+  '''cafebabe:deadbeef'''
+]
 
-[[allowlist.regexes]]
-regex = '''cafebabe:deadbeef'''
-description = "Example Sidekiq secret in documentation"
-
+[allowlist.paths]
 # Paths to ignore
-[[allowlist.paths]]
-regex = '''README\.md'''
-description = "Documentation file with example credentials"
-
-[[allowlist.paths]]
-regex = '''docs/.*\.md'''
-description = "Documentation files"
-
-[[allowlist.paths]]
-regex = '''\.github/workflows/.*'''
-description = "Workflow files may contain example patterns"
+paths = [
+  '''README\.md''',
+  '''docs/.*\.md''',
+  '''\.github/workflows/.*'''
+]

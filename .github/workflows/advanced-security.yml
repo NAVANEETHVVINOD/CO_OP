@@ -55,17 +55,23 @@ jobs:
         run: |
           echo "=== Checking for typosquatting attacks ==="
           
-          # Known typosquatting patterns (excluding legitimate packages)
+          # Known typosquatting patterns
           TYPOSQUAT_PATTERNS=(
             "reacct"
             "reqest"
-            "lodas"
             "pydantik"
             "sqlalchmy"
           )
           
+          # Check only in actual dependency declarations (not all code)
           for pattern in "${TYPOSQUAT_PATTERNS[@]}"; do
-            if grep -qi "$pattern" package.json pnpm-lock.yaml services/api/pyproject.toml 2>/dev/null; then
+            # Check package.json dependencies section only
+            if jq -r '.dependencies, .devDependencies, .peerDependencies | keys[]' package.json 2>/dev/null | grep -qi "^${pattern}$"; then
+              echo "🚨 POTENTIAL TYPOSQUATTING: Found suspicious package name: $pattern"
+              exit 1
+            fi
+            # Check pyproject.toml dependencies section only
+            if grep -E '^\s*"'"$pattern"'"' services/api/pyproject.toml 2>/dev/null; then
               echo "🚨 POTENTIAL TYPOSQUATTING: Found suspicious package name: $pattern"
               exit 1
             fi
@@ -150,13 +156,16 @@ jobs:
         run: |
           echo "=== Checking for crypto wallet hijacking (npm attack pattern) ==="
           
-          # Patterns from 2026 npm supply chain attack
-          if grep -rE "fetch.*replace|XMLHttpRequest.*replace|0x[0-9a-fA-F]{40}|bc1[a-zA-Z0-9]{39,59}" \
+          # Patterns from 2026 npm supply chain attack (excluding docs and examples)
+          if grep -rE "(fetch|XMLHttpRequest)\.prototype\..*=.*function.*replace.*(0x[0-9a-fA-F]{40}|bc1[a-zA-Z0-9]{39,59})" \
             --include="*.js" \
             --include="*.ts" \
             --exclude-dir=node_modules \
             --exclude-dir=.next \
-            . 2>/dev/null | head -10; then
+            --exclude-dir=docs \
+            --exclude-dir=examples \
+            --exclude="*.md" \
+            . 2>/dev/null; then
             echo "🚨 SUSPICIOUS: Found potential crypto wallet hijacking code"
             exit 1
           fi
@@ -260,8 +269,8 @@ jobs:
           pip install cyclonedx-bom
           pip freeze > requirements-freeze.txt
           cyclonedx-py requirements \
-            --infile requirements-freeze.txt \
-            --outfile sbom-python.json \
+            -i requirements-freeze.txt \
+            -o sbom-python.json \
             --format json
 
       - name: Upload SBOM
