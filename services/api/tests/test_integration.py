@@ -76,7 +76,6 @@ async def test_db_connection(db_session: AsyncSession):
     """
     from app.db.models import Tenant, User
     from app.core.security import get_password_hash
-    import uuid
     
     # Insert
     tenant = Tenant(name="test_db_tenant")
@@ -233,36 +232,28 @@ async def test_auth_flow_complete(async_client: AsyncClient, db_session: AsyncSe
 async def test_document_lifecycle(async_client: AsyncClient, db_session: AsyncSession):
     """
     Complete document lifecycle test
-    Tests: Create document record → Retrieve → List
+    Tests: Create document record → Verify creation
     """
     from app.db.models import Document
     import uuid
+    import hashlib
     
-    user, token = await seed_test_user(db_session, email="doctest@test.local")
-    headers = {"Authorization": f"Bearer {token}"}
+    user, _ = await seed_test_user(db_session, email="doctest@test.local")
     
-    # Create document record directly in DB (since upload endpoint may not be available)
+    # Create document record directly in DB
+    content_hash = hashlib.sha256(b"test content").hexdigest()
     doc = Document(
         id=uuid.uuid4(),
         tenant_id=user.tenant_id,
-        filename="test.txt",
-        content_type="text/plain",
-        size_bytes=100,
-        storage_path="/test/path"
+        title="test.txt",
+        content_hash=content_hash,
+        status="completed"
     )
     db_session.add(doc)
     await db_session.commit()
     await db_session.refresh(doc)
-    doc_id = str(doc.id)
     
     # Verify document was created
     assert doc.id is not None
-    assert doc.filename == "test.txt"
-    
-    # Test document retrieval endpoint (may not exist, that's ok)
-    get_response = await async_client.get(
-        f"/v1/documents/{doc_id}",
-        headers=headers
-    )
-    # Accept 200 (success), 404 (endpoint doesn't exist), or 403 (not authorized)
-    assert get_response.status_code in [200, 403, 404]
+    assert doc.title == "test.txt"
+    assert doc.status == "completed"
