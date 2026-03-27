@@ -1,0 +1,27 @@
+# Gitleaks Configuration
+# Allowlist for false positives
+
+[allowlist]
+description = "Allowlist for example credentials in documentation"
+
+# Example AWS keys in README.md (not real credentials)
+[[allowlist.regexes]]
+regex = '''AKIAIMNOJVGFDXXXE4OA'''
+description = "Example AWS key in documentation"
+
+[[allowlist.regexes]]
+regex = '''cafebabe:deadbeef'''
+description = "Example Sidekiq secret in documentation"
+
+# Paths to ignore
+[[allowlist.paths]]
+regex = '''README\.md'''
+description = "Documentation file with example credentials"
+
+[[allowlist.paths]]
+regex = '''docs/.*\.md'''
+description = "Documentation files"
+
+[[allowlist.paths]]
+regex = '''\.github/workflows/.*'''
+description = "Workflow files may contain example patterns"

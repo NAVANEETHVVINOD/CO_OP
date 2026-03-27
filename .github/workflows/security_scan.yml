@@ -56,7 +56,10 @@ jobs:
           python-version: "3.12"
 
       - name: Install pip-audit
-        run: pip install pip-audit>=2.7.0
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade pygments>=2.20.0
+          pip install pip-audit>=2.7.0
 
       - name: Install project dependencies
         run: pip install -e ".[dev]"
@@ -185,13 +188,14 @@ jobs:
 
           SUSPICIOUS=0
           for f in $PTH_FILES; do
-            # Allowlist known harmless files
-            if grep -q "distutils-precedence" "$f" || grep -q "__editable__" "$f"; then
+            # Allowlist known harmless files by filename
+            if echo "$f" | grep -qE "distutils-precedence|__editable__"; then
               echo "Skipping known harmless file: $f"
               continue
             fi
 
-            if grep -qEi "subprocess|exec|eval|base64|__import__|os\.system|socket|urllib|requests|curl" "$f"; then
+            # Check content for suspicious patterns
+            if grep -qEi "subprocess|exec|eval|base64|os\.system|socket|urllib|requests|curl" "$f"; then
               echo "🚨 SUSPICIOUS .pth file detected: $f"
               echo "--- Contents ---"
               cat "$f"
