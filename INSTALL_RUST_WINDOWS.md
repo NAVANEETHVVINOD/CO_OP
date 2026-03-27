@@ -37,19 +37,47 @@ scoop install rust
 
 ## After Installing Rust
 
+### Option 1: Use the Helper Script (Easiest)
+
+1. **Navigate to desktop app**:
+   ```powershell
+   cd F:\kannan\projects\CO_OS\apps\desktop
+   ```
+
+2. **Run the helper script**:
+   ```powershell
+   .\run-desktop.ps1
+   ```
+
+This script automatically adds Rust to your PATH and starts the app.
+
+### Option 2: Manual Method
+
 1. **Close and reopen your terminal** (PowerShell or CMD)
+   - This is required for PATH changes to take effect
 
 2. **Navigate to desktop app**:
    ```powershell
    cd F:\kannan\projects\CO_OS\apps\desktop
    ```
 
-3. **Install dependencies**:
+3. **Verify Rust is available**:
+   ```powershell
+   cargo --version
+   rustc --version
+   ```
+
+4. **If cargo is not found**, add it to PATH for this session:
+   ```powershell
+   $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
+   ```
+
+5. **Install dependencies**:
    ```powershell
    pnpm install
    ```
 
-4. **Run desktop app**:
+6. **Run desktop app**:
    ```powershell
    pnpm tauri dev
    ```
