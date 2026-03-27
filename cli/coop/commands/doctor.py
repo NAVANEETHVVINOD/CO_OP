@@ -1,8 +1,10 @@
-import typer
-import subprocess
 import os
-import psutil
 import shutil
+import subprocess
+
+import httpx
+import psutil
+import typer
 from rich.console import Console
 from rich.panel import Panel
 
@@ -45,12 +47,11 @@ def check():
 
     # 4. Check API Connectivity
     try:
-        import httpx
         with httpx.Client(timeout=2.0) as client:
             client.get(f"{API_URL}/health")
             console.print(f"[green]OK[/green] Backend API ({API_URL}) is reachable.")
-    except Exception:
-        console.print(f"[yellow]WARN[/yellow] Backend API ({API_URL}) unreachable (gateway might be stopped).")
+    except Exception as e:
+        console.print(f"[yellow]WARN[/yellow] Backend API ({API_URL}) unreachable: {e}")
         console.print("[dim]Set COOP_API_URL environment variable to override[/dim]")
 
     console.print("\n[bold green]Doctor check complete.[/bold green]")

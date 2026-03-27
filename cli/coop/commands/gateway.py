@@ -1,8 +1,10 @@
-import typer
-import subprocess
-import httpx
+import json as json_lib
 import os
+import subprocess
 from pathlib import Path
+
+import httpx
+import typer
 from rich.console import Console
 
 app = typer.Typer(help="Manage the Co-Op Gateway (Docker Stack)")
@@ -83,13 +85,12 @@ def status(
     try:
         res = subprocess.run(["docker", "compose", "-f", str(COMPOSE_FILE), "ps", "--format", "json"], capture_output=True, text=True)
         if json:
-            import json as json_lib
             # Docker ps format can be multiple lines of JSON or a single array
             try:
                 status_data["containers"] = json_lib.loads(res.stdout)
             except Exception:
                 # Fallback for older versions or line-delimited JSON
-                status_data["containers"] = [json_lib.loads(line) for line in res.stdout.splitlines() if line.strip()]
+                status_data["containers"] = [json_lib.loads(container_line) for container_line in res.stdout.splitlines() if container_line.strip()]
         else:
             console.print("[dim]Container Status:[/dim]")
             subprocess.run(["docker", "compose", "-f", str(COMPOSE_FILE), "ps"])
@@ -121,5 +122,4 @@ def status(
             console.print(f"[bold red]ERROR: API is unreachable: {e}[/bold red]")
 
     if json:
-        import json as json_lib
         console.print(json_lib.dumps(status_data))

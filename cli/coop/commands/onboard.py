@@ -1,10 +1,11 @@
-import typer
 import secrets
 import string
 from pathlib import Path
-from rich.console import Console
-from rich.prompt import Prompt, Confirm
+
 import httpx
+import typer
+from rich.console import Console
+from rich.prompt import Confirm, Prompt
 
 app = typer.Typer(help="Interactive onboarding for Co-Op OS")
 console = Console()
