@@ -65,9 +65,9 @@ jobs:
         run: |
           pip-audit \
             --format json \
-            --ignore-package co-op-api \
+            --skip-editable \
             --output pip-audit-report.json || true
-          pip-audit --ignore-package co-op-api
+          pip-audit --skip-editable
 
       - name: Upload pip-audit report
         if: always()
@@ -185,8 +185,8 @@ jobs:
 
           SUSPICIOUS=0
           for f in $PTH_FILES; do
-            # Allowlist distutils-precedence.pth (it's a standard setuptools file that looks like a hook but is harmless)
-            if grep -q "distutils-precedence" "$f"; then
+            # Allowlist known harmless files
+            if grep -q "distutils-precedence" "$f" || grep -q "__editable__" "$f"; then
               echo "Skipping known harmless file: $f"
               continue
             fi

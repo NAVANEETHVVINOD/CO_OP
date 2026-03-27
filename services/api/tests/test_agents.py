@@ -6,7 +6,7 @@ Verifies that agents use environment variables for LLM configuration.
 """
 
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 from app.agent.graph import create_research_graph
 from app.agent.state import AgentState
 from app.config import get_settings
