@@ -325,7 +325,7 @@ function CitationsBlock({ citations }: { citations: Citation[] }) {
                 <span className="bg-elevated px-1 rounded text-muted">Pg {cite.page}</span>
                 <span className="text-muted border-l border-dim pl-1">{(cite.score * 100).toFixed(0)}%</span>
               </div>
-              {cite.content && <div className="text-[11px] text-muted line-clamp-2 px-1 italic">"{cite.content}"</div>}
+              {cite.content && <div className="text-[11px] text-muted line-clamp-2 px-1 italic">&ldquo;{cite.content}&rdquo;</div>}
             </div>
           ))}
         </div>

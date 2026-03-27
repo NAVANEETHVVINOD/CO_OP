@@ -1,12 +1,28 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Briefcase, Calendar, CheckCircle2, Clock, Check, Loader2 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { toast } from 'sonner';
 
+interface Milestone {
+  id: string;
+  title: string;
+  status: string;
+  due_date?: string;
+}
+
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  created_at: string;
+  milestones?: Milestone[];
+}
+
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [completingId, setCompletingId] = useState<string | null>(null);
 
@@ -17,8 +33,7 @@ export default function ProjectsPage() {
         const data = await res.json();
         setProjects(data);
       }
-    } catch (err) {
-      console.error('Failed to fetch projects:', err);
+    } catch {
       toast.error('Failed to load projects');
     } finally {
       setLoading(false);
@@ -41,7 +56,7 @@ export default function ProjectsPage() {
       } else {
         toast.error('Failed to complete milestone');
       }
-    } catch (err) {
+    } catch {
       toast.error('An error occurred');
     } finally {
       setCompletingId(null);
@@ -99,7 +114,7 @@ export default function ProjectsPage() {
                   <h3 className="text-[12px] font-bold text-muted uppercase tracking-wider">Milestones</h3>
                   <div className="grid grid-cols-1 gap-3">
                     {project.milestones && project.milestones.length > 0 ? (
-                      project.milestones.map((m: any) => (
+                      project.milestones.map((m: Milestone) => (
                         <div key={m.id} className="flex items-center justify-between p-4 rounded-lg bg-elevated/50 border border-dim group hover:border-dim-highlight transition-colors">
                           <div className="flex items-center gap-4">
                             <div className={`p-1.5 rounded-full ${m.status === 'completed' ? 'bg-green-status/20 text-green-status' : 'bg-muted/20 text-muted'}`}>

@@ -27,7 +27,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         } else {
           setVerifying(false);
         }
-      } catch (err) {
+      } catch {
         localStorage.removeItem('co_op_token');
         router.replace('/login');
       }

@@ -1,11 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Receipt, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { env } from '@/lib/env';
 
 const API_URL = env.API_URL;
+
+interface Invoice {
+  amount: number;
+}
 
 export function InvoicesWidget() {
   const [total, setTotal] = useState<number>(0);
@@ -17,7 +21,7 @@ export function InvoicesWidget() {
     })
       .then(res => res.json())
       .then(data => {
-        const sum = Array.isArray(data) ? data.reduce((acc: number, inv: any) => acc + (inv.amount || 0), 0) : 0;
+        const sum = Array.isArray(data) ? data.reduce((acc: number, inv: Invoice) => acc + (inv.amount || 0), 0) : 0;
         setTotal(sum);
       })
       .catch(() => setTotal(0));

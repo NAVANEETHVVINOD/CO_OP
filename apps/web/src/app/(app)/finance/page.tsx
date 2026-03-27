@@ -1,12 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Receipt, DollarSign, Clock, CheckCircle2, AlertCircle, Loader2, ArrowUpRight, TrendingUp } from 'lucide-react';
+import { Receipt, Clock, Loader2, ArrowUpRight, TrendingUp } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { toast } from 'sonner';
 
+interface Invoice {
+  id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+  due_date?: string;
+}
+
 export default function FinancePage() {
-  const [invoices, setInvoices] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchInvoices = async () => {

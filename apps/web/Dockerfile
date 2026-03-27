@@ -16,6 +16,10 @@ RUN pnpm install --no-frozen-lockfile
 # Copy source code and build
 COPY . .
 
+# Build args for Next.js public env vars
+ARG NEXT_PUBLIC_API_URL=http://localhost:8000
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Next.js telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 

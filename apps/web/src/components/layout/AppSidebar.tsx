@@ -1,20 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   MessageSquare,
   FileText,
   Search,
-  GitBranch,
   Bot,
   CheckSquare,
   LayoutDashboard,
   TrendingUp,
   Settings,
-  Bug,
-  ScrollText,
   LogOut,
   Briefcase,
   Receipt,

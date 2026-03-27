@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Bot, Play, X, CheckCircle, Circle, Loader2, RotateCw } from 'lucide-react';
+import { Bot, Play, X, CheckCircle, Circle, Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { MonoId } from '@/components/shared/MonoId';

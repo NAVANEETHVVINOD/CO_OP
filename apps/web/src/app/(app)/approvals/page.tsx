@@ -1,11 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CheckSquare, CheckCircle, XCircle, AlertTriangle, User, Shield, Loader2, ArrowRight } from 'lucide-react';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { MonoId } from '@/components/shared/MonoId';
-import { EmptyState } from '@/components/shared/EmptyState';
-import { Skeleton } from '@/components/ui/skeleton';
+import { CheckSquare, CheckCircle, XCircle, AlertTriangle, User, Shield, Loader2 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -14,7 +10,7 @@ interface Approval {
   action_type: string;
   description: string;
   proposed_by: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   evidence?: string[];
   created_at: string;
   priority?: 'low' | 'medium' | 'high';

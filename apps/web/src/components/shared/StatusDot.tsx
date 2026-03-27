@@ -13,8 +13,6 @@ interface StatusDotProps {
 }
 
 export function StatusDot({ status, size = 'md', className }: StatusDotProps) {
-  const px = size === 'sm' ? '6px' : '8px';
-
   // Backward compatibility: 'ok' maps to 'healthy', 'pending' maps to 'warning'
   const normalizedStatus = status === 'ok' ? 'healthy' : status === 'pending' ? 'warning' : status;
 
