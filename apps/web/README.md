@@ -1,219 +1,240 @@
-# Co-Op Dashboard — Next.js Frontend
+# Co-Op Frontend
 
-> The user interface for Co-Op Autonomous Company OS.  
-> A dark‑theme dashboard that lets you monitor agents, approve proposals, upload documents, and chat with your AI workforce.
+Next.js 16 application with App Router, React 19, Tailwind CSS 4, and shadcn/ui components.
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+## Table of Contents
 
----
+- [Overview](#overview)
+- [Component Architecture](#component-architecture)
+- [State Management](#state-management)
+- [Styling & Design System](#styling--design-system)
+- [Key Pages](#key-pages)
+- [API Client](#api-client)
+- [Environment Variables](#environment-variables)
+- [Development](#development)
+- [Testing](#testing)
 
 ## Overview
 
-This is the frontend application for Co-Op. It communicates with the backend API via REST and Server‑Sent Events (SSE) to provide a real‑time view of your autonomous business.
+The Co-Op frontend is a production-ready Next.js application featuring:
 
-- **Live agent activity** — See what each agent is doing, step by step.
-- **Approval inbox** — Review and approve proposals, invoices, and other human‑in‑the‑loop actions.
-- **Document management** — Upload, index, and search your portfolio files.
-- **Chat with RAG** — Ask questions about your documents and get cited answers.
-- **Cost tracker** — Monitor token usage and daily budgets.
-- **Dark theme** — Designed for comfortable, long‑session use.
+- Next.js 16 App Router with React 19 Server Components
+- Tailwind CSS 4 with dark theme design system
+- shadcn/ui accessible component library
+- Real-time chat with Server-Sent Events (SSE)
+- TanStack Query v5 for data fetching and caching
+- Zustand for client-side state management
+- TypeScript 5.7 for type safety
 
----
+### Technology Stack
 
-## Technology Stack
+- **Framework:** Next.js 16.1.4 with App Router
+- **UI Library:** React 19.0.0 with Server Components
+- **Styling:** Tailwind CSS 4.0.0 with custom design tokens
+- **Components:** shadcn/ui (Radix UI primitives)
+- **State:** Zustand 5.0.2 for global state
+- **Data Fetching:** TanStack Query v5.62.11
+- **Forms:** React Hook Form 7.54.2 with Zod validation
+- **Icons:** Lucide React 0.468.0
+- **Type Safety:** TypeScript 5.7.3
 
-| Category | Tools |
-|----------|-------|
-| **Framework** | [Next.js 15](https://nextjs.org/) (App Router) |
-| **Language** | TypeScript |
-| **Styling** | Tailwind CSS, CSS variables (dark/light) |
-| **State Management** | [Zustand](https://zustand-demo.pmnd.rs/) (client‑side) |
-| **Data Fetching** | TanStack Query (optional, used for some pages) |
-| **Real‑time** | Server‑Sent Events (SSE) via `EventSource` |
-| **UI Components** | Radix UI primitives (Dialog, Tooltip, etc.) |
-| **Icons** | Lucide React |
-| **Build Tool** | Next.js built‑in compiler |
+## Component Architecture
 
----
+### Component Hierarchy Diagram
 
-## Project Structure
-
-```
-apps/web/
-├── public/                 # Static assets
-├── src/
-│   ├── app/                # Next.js App Router pages
-│   │   ├── (app)/          # Authenticated routes (dashboard, chat, etc.)
-│   │   ├── (auth)/         # Login / signup
-│   │   └── layout.tsx      # Root layout
-│   ├── components/         # Reusable UI components
-│   │   ├── layout/         # Sidebar, top bar
-│   │   ├── shared/         # EmptyState, PageHeader, StatusBadge
-│   │   └── ui/             # Radix‑based components (button, card, dialog, etc.)
-│   ├── hooks/              # Custom React hooks (useChat, etc.)
-│   ├── lib/                # API client, utilities
-│   ├── store/              # Zustand stores (chatStore, etc.)
-│   └── types/              # TypeScript definitions (API responses)
-├── .env.example            # Example environment variables
-├── Dockerfile              # Multi‑stage build for production
-├── next.config.ts          # Next.js configuration
-├── tailwind.config.ts
-├── package.json
-└── README.md               # This file
-```
-
----
-
-## Running the Frontend
-
-### Prerequisites
-- Node.js 18+ and `pnpm` (recommended)
-- Backend API running (see [main README](../../README.md))
-
-### 1. Install Dependencies
-```bash
-pnpm install
-```
-
-### 2. Configure Environment
-Copy the example environment file and adjust if needed:
-```bash
-cp .env.example .env.local
+```mermaid
+graph TD
+    Layout[Root Layout] --> Dashboard[Dashboard Page]
+    Layout --> Chat[Chat Page]
+    Layout --> Documents[Documents Page]
+    Layout --> Search[Search Page]
+    Layout --> Agents[Agents Page]
+    Layout --> Approvals[Approvals Page]
+    Layout --> Admin[Admin Page]
+    Layout --> Projects[Projects Page]
+    Layout --> Finance[Finance Page]
+    
+    Dashboard --> StatusCard[StatusCard]
+    Dashboard --> ActivityFeed[ActivityFeed]
+    Dashboard --> QuickActions[QuickActions]
+    
+    Chat --> ChatInput[ChatInput]
+    Chat --> MessageList[MessageList]
+    Chat --> CitationPanel[CitationPanel]
+    
+    Documents --> DocumentList[DocumentList]
+    Documents --> UploadButton[UploadButton]
+    Documents --> DocumentStatus[DocumentStatus]
+    
+    Search --> SearchBar[SearchBar]
+    Search --> ResultsList[ResultsList]
+    
+    Agents --> AgentCard[AgentCard]
+    Agents --> AgentLogs[AgentLogs]
+    
+    Approvals --> ApprovalList[ApprovalList]
+    Approvals --> ApprovalModal[ApprovalModal]
+    
+    Admin --> UserList[UserList]
+    Admin --> SystemHealth[SystemHealth]
+    
+    Projects --> ProjectCard[ProjectCard]
+    Projects --> MilestoneList[MilestoneList]
+    
+    Finance --> InvoiceList[InvoiceList]
+    Finance --> CostTracker[CostTracker]
 ```
 
-Default values:
+### Application Structure
+
 ```
-NEXT_PUBLIC_API_URL=http://localhost:8000
+apps/web/src/
+├── app/                    # Next.js App Router pages
+│   ├── (app)/             # Authenticated routes
+│   │   ├── layout.tsx     # Auth layout with sidebar
+│   │   ├── dashboard/     # Dashboard page
+│   │   ├── chat/          # Chat interface
+│   │   ├── documents/     # Document management
+│   │   ├── search/        # Search interface
+│   │   ├── agents/        # Agent monitoring
+│   │   ├── approvals/     # HITL approval queue
+│   │   ├── admin/         # Admin settings
+│   │   ├── projects/      # Project management
+│   │   └── finance/       # Financial tracking
+│   ├── (auth)/            # Unauthenticated routes
+│   │   ├── login/         # Login page
+│   │   └── signup/        # Signup page
+│   ├── layout.tsx         # Root layout
+│   ├── page.tsx           # Landing page
+│   └── globals.css        # Global styles
+├── components/            # React components
+│   ├── dashboard/         # Dashboard-specific components
+│   ├── layout/            # Layout components (sidebar, topbar)
+│   ├── shared/            # Shared components (StatusDot, MonoId, etc.)
+│   └── ui/                # shadcn/ui components
+├── hooks/                 # Custom React hooks
+│   └── useChat.ts         # Chat SSE streaming hook
+├── lib/                   # Utility libraries
+│   ├── api.ts             # API client with fetch wrapper
+│   ├── env.ts             # Environment variable validation
+│   └── utils.ts           # Utility functions
+├── store/                 # Zustand stores
+│   └── chatStore.ts       # Chat state management
+├── types/                 # TypeScript type definitions
+│   └── api.ts             # API response types
+└── __tests__/             # Test files
+    ├── properties.test.ts # Property-based tests
+    └── setup.ts           # Test configuration
 ```
 
-### 3. Start Development Server
-```bash
-pnpm dev
+## State Management
+
+- **Zustand** - Global client state (theme, user preferences, notifications)
+- **TanStack Query** - Server state (caching, background refetch)
+- **React Context** - Theme and authentication context
+
+## Styling & Design System
+
+- **Tailwind CSS 4** - Utility-first CSS framework
+- **shadcn/ui** - Accessible, customizable components (buttons, dialogs, tables, etc.)
+- **Dark mode** - Fully supported, toggles via Zustand store
+
+## Key Pages
+
+### Dashboard (`/dashboard`)
+- Displays system health indicators (API, database, Redis, MinIO, Qdrant).
+- Shows recent activity feed.
+- Provides quick action buttons.
+
+### Chat (`/chat`)
+- Real-time chat interface with SSE streaming.
+- Displays citations inline with messages.
+- Uses `useChat` hook for managing conversation state.
+
+### Documents (`/documents`)
+- Upload documents via drag-and-drop or file picker.
+- View document list with status indicators (PENDING, INDEXING, READY, FAILED).
+- Delete documents.
+
+### Search (`/search`)
+- Hybrid search across all indexed documents.
+- Displays results with relevance scores.
+- Filters by document type, date, etc.
+
+### Agents (`/agents`)
+- Monitor AI agent status and logs.
+- View agent execution history.
+
+### Approvals (`/approvals`)
+- Human-in-the-loop (HITL) approval queue.
+- Approve or reject actions (e.g., sending proposals, creating invoices).
+
+### Admin (`/admin`)
+- User management.
+- System settings.
+- Access control (admin only).
+
+### Projects (`/projects`)
+- Track active projects and milestones.
+- View project timelines and deliverables.
+
+### Finance (`/finance`)
+- View invoices and payment status.
+- Track costs and daily token usage vs budget.
+- Fetches data from `/v1/costs` endpoint.
+
+## API Client
+
+The API client (`lib/api.ts`) provides typed functions for all backend endpoints. It automatically attaches authentication tokens from `localStorage` (or `httpOnly` cookies, depending on configuration).
+
+```typescript
+import { api } from '@/lib/api';
+
+const conversations = await api.getConversations();
+const doc = await api.uploadDocument(file);
 ```
-
-The dashboard will be available at http://localhost:3000.
-
-### 4. Build for Production
-```bash
-pnpm build
-```
-
-The static output will be in the `.next` directory. You can start it with:
-```bash
-pnpm start
-```
-
----
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_API_URL` | Base URL of the backend API | `http://localhost:8000` |
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_API_URL` | Backend API URL (e.g., `http://localhost:8000`) |
+| `NEXT_PUBLIC_WS_URL` | WebSocket URL for streaming (optional) |
 
----
+## Development
 
-## Key Features
+```bash
+# Install dependencies
+pnpm install
 
-### Authentication
-- Login page uses the backend `/v1/auth/token` endpoint.
-- Token stored as `co_op_token` in `localStorage`.
-- Automatic token refresh on 401 responses.
+# Start development server
+pnpm dev
 
-### Chat with Streaming
-- Uses `EventSource` to receive token‑by‑token responses.
-- Citations are displayed as cards below each message.
-- Powered by the `useChat` hook and `chatStore`.
+# Build for production
+pnpm build
 
-### Document Management
-- Upload files (PDF, Word, text) → backend processes and indexes them.
-- List, search, and delete documents from the dashboard.
+# Start production server
+pnpm start
 
-### Approval Inbox
-- Displays pending actions (proposals, invoices, etc.).
-- Each item shows evidence of what the agent was doing and why.
-- One‑click approve / reject.
-
-### Agent Activity Feed
-- Live feed of what each agent is currently doing.
-- Integrates with the backend’s WebSocket or SSE endpoints.
-
-### Cost Tracker (Stage 2+)
-- Progress bar showing daily token usage vs budget.
-- Fetches data from `/v1/costs` endpoint.
-
----
-
-## Architecture Diagram (Frontend Perspective)
-
-The frontend interacts with the backend API and consumes real‑time events as shown below:
-
+# Run linter
+pnpm lint
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   Next.js Dashboard                     │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │                User Interaction                 │   │
-│  └─────────────────────────┬───────────────────────┘   │
-│                            │                           │
-│  ┌─────────────────────────▼───────────────────────┐   │
-│  │            Zustand Stores (chatStore, etc.)     │   │
-│  └─────────────────────────┬───────────────────────┘   │
-│                            │                           │
-│  ┌─────────────────────────▼───────────────────────┐   │
-│  │            useChat, useDocuments, etc.          │   │
-│  └─────────────────────────┬───────────────────────┘   │
-│                            │                           │
-│  ┌─────────────────────────▼───────────────────────┐   │
-│  │            api.ts (fetch with token)            │   │
-│  └─────────────────────────┬───────────────────────┘   │
-└─────────────────────────────┼─────────────────────────┘
-                              │ HTTP / SSE
-┌─────────────────────────────▼─────────────────────────┐
-│                    Backend API (FastAPI)              │
-└───────────────────────────────────────────────────────┘
-```
-
----
-
-## Adding New Pages
-
-1. Create a new folder under `src/app/(app)/` (e.g., `clients`).
-2. Add a `page.tsx` file with the page component.
-3. Optionally add a new menu item in `components/layout/AppSidebar.tsx`.
-4. If the page needs data from the backend, add the corresponding API call in `lib/api.ts` and a Zustand store if needed.
-
----
-
-## Styling
-
-- Tailwind CSS is configured with a custom theme.
-- Dark mode is controlled by a class `dark` on the `html` element. The default theme is dark.
-- All colours are defined in `globals.css` as CSS variables, making them easy to override.
-
----
 
 ## Testing
 
-Run tests (if any) with:
 ```bash
+# Run all tests
 pnpm test
+
+# Run with coverage report
+pnpm test:coverage
 ```
 
-Currently there are no frontend tests; contributions are welcome.
+Tests use Vitest and Testing Library. See [TESTING.md](../../docs/TESTING.md) for details.
 
----
+## Related Documentation
 
-## Contributing
-
-Please refer to the main project’s [contributing guidelines](../../README.md#contributing). For frontend‑specific changes:
-
-- Use TypeScript.
-- Follow the existing component structure.
-- Ensure the build passes (`pnpm build`).
-- Test the page in both light and dark modes (light mode is not the default but should work).
-
----
-
-## License
-
-Apache License 2.0 – See [LICENSE](../../LICENSE) in the repository root.
+- [Backend API Documentation](../../services/api/README.md)
+- [Database Schema](../../docs/DATABASE.md)
+- [Testing Guide](../../docs/TESTING.md)
+- [Contributing Guidelines](../../CONTRIBUTING.md)

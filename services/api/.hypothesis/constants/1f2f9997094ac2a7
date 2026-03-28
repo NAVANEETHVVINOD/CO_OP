@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\routers\projects.py
+# hypothesis_version: 6.148.7
+
+[404, '/v1/projects', 'Milestone not found', 'Projects', 'completed', 'message', 'status', 'success']

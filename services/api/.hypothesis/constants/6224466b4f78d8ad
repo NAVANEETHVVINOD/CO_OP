@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\agent\proposal_writer.py
+# hypothesis_version: 6.148.7
+
+[0.3, 45.0, 200, 500, 'Lead not found', 'approval_id', 'choices', 'content', 'error', 'hitl_queued', 'lead_title', 'lead_url', 'max_tokens', 'message', 'messages', 'model', 'proposal', 'proposal_text', 'rag_snippets', 'ready', 'relevant_chunks', 'role', 'score', 'simple', 'status', 'submit', 'system', 'temperature', 'text', 'user']

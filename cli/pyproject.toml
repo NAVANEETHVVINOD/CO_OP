@@ -11,9 +11,22 @@ dependencies = [
     "psutil>=5.9.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "pytest-cov>=5.0.0",
+    "pytest-mock>=3.14.0",
+]
+
 [project.scripts]
 coop = "coop.main:app"
 
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Phase 2 (Task 4.3): CLI coverage baseline established at 0%
+# Target: 75% coverage (see .kiro/specs/seo-documentation-test-coverage)
+addopts = "--cov=coop --cov-report=html --cov-report=term --cov-fail-under=0"

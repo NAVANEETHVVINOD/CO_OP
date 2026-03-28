@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\routers\credits.py
+# hypothesis_version: 6.148.7
+
+[0.0, 100.0, 100, 100000, '/v1/costs', 'Credits', 'all_time', 'completion_tokens', 'daily_limit', 'prompt_tokens', 'today', 'total_cost', 'total_tokens', 'usage_pct']

@@ -11,6 +11,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Upgrade pip and setuptools to patched versions (security fixes)
+# CVE-2025-47273 (setuptools), CVE-2025-8869 (pip), CVE-2026-1703 (pip)
+RUN pip install --no-cache-dir --upgrade 'pip>=26.0' 'setuptools>=78.1.1'
+
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
@@ -31,6 +35,10 @@ RUN uv pip install pytest pytest-asyncio pytest-mock aiosqlite bcrypt==4.0.1 && 
 FROM python:3.12-slim
 
 WORKDIR /app
+
+# Upgrade pip and setuptools in runtime image (security fixes)
+# CVE-2025-47273 (setuptools), CVE-2025-8869 (pip), CVE-2026-1703 (pip)
+RUN pip install --no-cache-dir --upgrade 'pip>=26.0' 'setuptools>=78.1.1'
 
 # Install runtime dependencies ONLY
 RUN apt-get update && apt-get install -y --no-install-recommends \

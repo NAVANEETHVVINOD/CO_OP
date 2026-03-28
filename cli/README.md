@@ -156,6 +156,66 @@ When the API is unreachable, check:
 2. API URL is correct: `echo $COOP_API_URL`
 3. Firewall allows connections to the API port
 
+## Common Workflows
+
+### Initial Setup
+
+```bash
+# 1. Install CLI
+pip install -e ./cli
+
+# 2. Start services
+coop gateway start
+
+# 3. Check status
+coop gateway status
+
+# 4. Run diagnostics
+coop doctor check
+```
+
+### Daily Operations
+
+```bash
+# Check system health
+coop gateway status
+
+# View service logs
+docker compose -f $COOP_COMPOSE_PATH logs -f
+
+# Restart a specific service
+docker compose -f $COOP_COMPOSE_PATH restart co-op-api
+
+# Stop all services
+coop gateway stop
+```
+
+### Backup and Restore
+
+```bash
+# Create backup
+coop backup create
+
+# Backup is saved to ./backups/ directory
+# Restore manually:
+# 1. Stop services: coop gateway stop
+# 2. Restore database: cat backup.sql | docker exec -i docker-postgres-1 psql -U coop coop_os
+# 3. Start services: coop gateway start
+```
+
+### Monitoring
+
+```bash
+# Check status with JSON output (for scripts)
+coop gateway status --json
+
+# Check API health
+curl http://localhost:8000/health
+
+# Check resource usage
+docker stats
+```
+
 ## Examples
 
 ### Custom Installation Directory
@@ -194,6 +254,22 @@ coop gateway start
 # Production
 export COOP_ENV_FILE=./infrastructure/docker/.env.prod
 coop gateway start
+```
+
+### Automated Monitoring Script
+
+```bash
+#!/bin/bash
+# monitor.sh - Check Co-Op status every 5 minutes
+
+while true; do
+    STATUS=$(coop gateway status --json)
+    if echo "$STATUS" | jq -e '.api.healthy == false' > /dev/null; then
+        echo "API is unhealthy! Sending alert..."
+        # Send alert (email, Slack, etc.)
+    fi
+    sleep 300
+done
 ```
 
 ## Development

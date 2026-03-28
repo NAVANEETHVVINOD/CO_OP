@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\core\logging.py
+# hypothesis_version: 6.148.7
+
+[1024, '%Y-%m-%d %H:%M:%S', 'api_key', 'asyncio', 'exception', 'function', 'httpcore', 'httpx', 'level', 'line', 'logger', 'logs/app.log', 'message', 'module', 'password', 'production', 'request_id', 'secret', 'timestamp', 'token', 'urllib3', 'user_id', 'utf-8']

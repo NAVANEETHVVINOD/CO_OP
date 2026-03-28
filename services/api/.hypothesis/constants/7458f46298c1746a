@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\core\security.py
+# hypothesis_version: 6.148.7
+
+[400, 'HS256', '[0-9]', '[A-Z]', '[a-z]', 'auto', 'bcrypt', 'exp', 'jti', 'sub', 'uuid']

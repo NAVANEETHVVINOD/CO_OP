@@ -80,6 +80,7 @@ packages = ["app"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
 # Phase 1 (v1.0.3): Temporarily lowered to 68% to establish baseline
 # Phase 2 will enhance coverage to 80% target (see .kiro/specs/seo-documentation-test-coverage)
 addopts = "--cov=app --cov-report=html --cov-report=term --cov-fail-under=68"

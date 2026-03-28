@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\core\hitl.py
+# hypothesis_version: 6.148.7
+
+[1000, 5000, 'CRITICAL', 'HIGH', 'LOW', 'MEDIUM', 'READ_ONLY', 'amount', 'invoice', 'outreach', 'pending', 'proposal', 'score']

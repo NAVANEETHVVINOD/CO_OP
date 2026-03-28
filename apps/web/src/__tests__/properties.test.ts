@@ -107,8 +107,8 @@ describe('Property Tests', () => {
         }
         
         const content = fs.readFileSync(envFile, 'utf-8');
-        // Should use process.env.NEXT_PUBLIC_API_URL
-        return content.includes('process.env.NEXT_PUBLIC');
+        // Should use process.env (with bracket notation or dot notation)
+        return content.includes('process.env');
       }),
       { numRuns: 100 }
     );

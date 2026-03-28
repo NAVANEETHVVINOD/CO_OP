@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\routers\invoices.py
+# hypothesis_version: 6.148.7
+
+['/v1/invoices', 'Finance']

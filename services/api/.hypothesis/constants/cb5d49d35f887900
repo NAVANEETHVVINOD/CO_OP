@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\main.py
+# hypothesis_version: 6.148.7
+
+[1.0, '*', '0.3.0', '=', 'Co-Op API', 'Co-Op API Starting', 'Sentry: Enabled', 'admin', 'admin@co-op.local']

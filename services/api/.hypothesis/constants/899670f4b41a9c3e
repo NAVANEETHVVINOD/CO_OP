@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\routers\settings.py
+# hypothesis_version: 6.148.7
+
+['/hardware', '/v1/settings', 'Settings', 'UNKNOWN', 'error', 'hardware_tier', 'tier']

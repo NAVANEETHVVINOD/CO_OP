@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\dependencies.py
+# hypothesis_version: 6.148.7
+
+[400, '/v1/auth/token', 'Bearer', 'Inactive user', 'WWW-Authenticate', 'sub']

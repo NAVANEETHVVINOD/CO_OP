@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\config.py
+# hypothesis_version: 6.148.7
+
+['.env', 'API_BASE_URL', 'DATABASE_URL', 'DB_PASS', 'FRONTEND_URL', 'INFO', 'MINIO_ROOT_PASSWORD', 'MINIO_ROOT_USER', 'MINIO_URL', 'OLLAMA_URL', 'REDIS_URL', 'SECRET_KEY', 'Settings', 'after', 'ignore', 'local', 'production', 'utf-8']

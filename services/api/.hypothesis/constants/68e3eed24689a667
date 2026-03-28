@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\db\repositories.py
+# hypothesis_version: 6.148.7
+
+[100, 'ModelType', 'event_data', 'event_type', 'tenant_id', 'user_id']

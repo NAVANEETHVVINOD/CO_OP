@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\routers\auth.py
+# hypothesis_version: 6.148.7
+
+[400, '/me', '/refresh', '/token', '/v1/auth', '5/minute', 'Authentication', 'Bearer', 'Inactive user', 'WWW-Authenticate', 'access_token', 'bearer', 'lax', 'local', 'refresh_token', 'sub', 'token_type']

@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\core\minio_client.py
+# hypothesis_version: 6.148.7
+
+['Created MinIO bucket', 'MinIO delete error', 'MinIO error', 'MinIO get error', 'MinIO upload error', 'co-op-documents', 'http://', 'https://', 'parsed-chunks', 'raw-documents']

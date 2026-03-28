@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\core\hardware_detector.py
+# hypothesis_version: 6.148.7
+
+[1024, '--query-gpu=name', 'AGENCY', 'SOLO', 'TEAM', 'Unknown', 'brand_raw', 'cpu_cores', 'cpu_model', 'cpu_threads', 'gpu_available', 'gpu_name', 'hardware_tier', 'nvidia-smi', 'ram_gb', 'tier']

@@ -5,12 +5,15 @@ Checks all service health, attempts self-heal, alerts via Telegram.
 import logging
 
 import httpx
+from app.db.session import engine
+from app.core.redis_client import redis_client
+from app.config import get_settings
+from app.communication.telegram import send_alert
 
 logger = logging.getLogger(__name__)
 
 def _get_services():
     """Get service URLs from settings."""
-    from app.config import get_settings
     settings = get_settings()
     return {
         "postgres":  {"type": "internal"},  # checked via SQLAlchemy
@@ -36,7 +39,6 @@ async def _check_service_http(name: str, url: str) -> bool:
 async def _check_postgres() -> bool:
     """Check PostgreSQL via SQLAlchemy."""
     try:
-        from app.db.session import engine
         from sqlalchemy import text
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
@@ -49,7 +51,6 @@ async def _check_postgres() -> bool:
 async def _check_redis() -> bool:
     """Check Redis via ping."""
     try:
-        from app.core.redis_client import redis_client
         return await redis_client.ping()
     except Exception as e:
         logger.warning(f"Redis check failed: {e}")
@@ -80,7 +81,6 @@ async def run_system_monitor() -> None:
         logger.error(f"Unhealthy services: {unhealthy}")
         # Send Telegram alert
         try:
-            from app.communication.telegram import send_alert
             alert_msg = (
                 f"🔴 Unhealthy services: {', '.join(unhealthy)}\n"
                 f"🟢 Healthy: {', '.join(healthy)}"

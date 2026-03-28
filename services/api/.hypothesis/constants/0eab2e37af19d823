@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\agent\nodes.py
+# hypothesis_version: 6.148.7
+
+[0.0, 0.7, 300, '\n---', '...', 'chunk_index', 'dense', 'document_id', 'final_answer', 'question', 'rerank_score', 'reranked_docs', 'retrieved_docs', 'rrf_score', 'sparse', 'tenant_id', 'text', 'unknown']

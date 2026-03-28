@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\routers\search.py
+# hypothesis_version: 6.148.7
+
+[0.0, 400, '/v1/search', 'Search', 'chunk_index', 'document_id', 'rerank_score', 'rrf_score', 'text']

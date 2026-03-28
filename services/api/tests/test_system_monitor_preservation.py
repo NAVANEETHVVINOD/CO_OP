@@ -9,10 +9,10 @@ from app.crons.system_monitor import _get_services
 
 class MockSettings:
     """Mock settings with typical Docker service URLs."""
-    QDRANT_URL = "http://qdrant:6333"
-    OLLAMA_URL = "http://ollama:11434"
-    LITELLM_URL = "http://litellm:4000"
-    MINIO_URL = "minio:9000"  # This will be used but we're testing non-MinIO
+    QDRANT_URL = "http://localhost:6333"
+    OLLAMA_URL = "http://localhost:11434"
+    LITELLM_URL = "http://localhost:4000"
+    MINIO_URL = "localhost:9000"  # This will be used but we're testing non-MinIO
 
 
 def test_postgres_config_unchanged():

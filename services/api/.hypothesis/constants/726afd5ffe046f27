@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\routers\approvals.py
+# hypothesis_version: 6.148.7
+
+[404, '/v1/approvals', 'Approvals', 'approved', 'message', 'proposal', 'rejected', 'status', 'success']
