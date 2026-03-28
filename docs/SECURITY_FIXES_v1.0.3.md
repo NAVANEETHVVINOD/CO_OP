@@ -11,37 +11,37 @@ This document tracks security vulnerabilities fixed in v1.0.3 release.
 - **Severity**: HIGH
 - **Package**: setuptools
 - **Vulnerable Version**: 70.2.0
-- **Fixed Version**: 78.1.1
+- **Fixed Version**: 79.0
 - **CVE**: CVE-2025-47273
 - **Description**: Path traversal vulnerability in setuptools PackageIndex
-- **Fix**: Upgraded setuptools to >=78.1.1 in all Docker images
+- **Fix**: Upgraded setuptools to >=79.0 in all Docker images
 
 ### 2. pip: Missing Checks on Symbolic Link Extraction (CVE-2025-8869)
 
 - **Severity**: MEDIUM
 - **Package**: pip
 - **Vulnerable Version**: 25.0.1
-- **Fixed Version**: 25.3
+- **Fixed Version**: 26.1
 - **CVE**: CVE-2025-8869
 - **Description**: pip missing checks on symbolic link extraction
-- **Fix**: Upgraded pip to >=26.0 in all Docker images
+- **Fix**: Upgraded pip to >=26.1 in all Docker images
 
 ### 3. pip: Information Disclosure via Path Traversal (CVE-2026-1703)
 
 - **Severity**: LOW
 - **Package**: pip
 - **Vulnerable Version**: 25.0.1
-- **Fixed Version**: 26.0
+- **Fixed Version**: 26.1
 - **CVE**: CVE-2026-1703
 - **Description**: Information disclosure via path traversal when installing crafted wheel archives
-- **Fix**: Upgraded pip to >=26.0 in all Docker images
+- **Fix**: Upgraded pip to >=26.1 in all Docker images
 
 ## Implementation
 
 ### Changes Made
 
 1. **services/api/Dockerfile**:
-   - Added `RUN pip install --no-cache-dir --upgrade 'pip>=26.0' 'setuptools>=78.1.1'` in builder stage
+   - Added `RUN pip install --no-cache-dir --upgrade 'pip>=26.1' 'setuptools>=79.0'` in builder stage
    - Added same upgrade command in runtime stage
 
 ### Verification
