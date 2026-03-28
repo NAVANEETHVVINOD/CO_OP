@@ -9,7 +9,7 @@ import uuid
 import io
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import patch, AsyncMock
 from tests.v1_test_utils import seed_test_user
 
 

@@ -12,7 +12,7 @@ Tests the full chat streaming workflow:
 """
 import pytest
 import json
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.v1_test_utils import seed_test_user
