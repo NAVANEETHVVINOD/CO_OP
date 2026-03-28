@@ -13,6 +13,8 @@ venv/
 services/api/.venv/
 services/api/test.db
 services/api/uploads/
+.coverage
+htmlcov/
 
 # Node / Next.js
 node_modules/
