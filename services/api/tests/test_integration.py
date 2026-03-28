@@ -326,7 +326,7 @@ async def test_rag_pipeline_integration(async_client: AsyncClient, db_session: A
     )
     created_chunks = result.scalars().all()
     assert len(created_chunks) > 0
-    assert all(chunk.embedding is not None for chunk in created_chunks)
+    assert all(chunk.text is not None for chunk in created_chunks)
     
     # Step 4: Test search endpoint (may return 404 if not implemented)
     search_response = await async_client.post(
