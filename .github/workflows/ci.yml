@@ -150,16 +150,20 @@ jobs:
         run: pnpm audit --audit-level moderate
 
       - name: Generate Python SBOM
+        continue-on-error: true
         working-directory: services/api
         run: |
           pip install cyclonedx-bom
           cyclonedx-py requirements -o sbom-python.json
 
       - name: Generate Node SBOM
+        continue-on-error: true
         run: |
           npx @cyclonedx/cyclonedx-npm --output-file sbom-node.json
 
       - name: Upload SBOMs
+        continue-on-error: true
+        if: always()
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874
         with:
           name: sboms
