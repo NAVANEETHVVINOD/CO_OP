@@ -1,0 +1,13 @@
+title = "Gitleaks Config"
+
+[allowlist]
+paths = [
+  "README.md",
+  "docs/.*\\.md",
+  ".github/workflows/.*"
+]
+
+regexes = [
+  "AKIAIMNOJVGFDXXXE4OA",
+  "cafebabe:deadbeef"
+]

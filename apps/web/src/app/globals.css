@@ -1,0 +1,193 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+:root {
+  --bg-base: #0A0A0F;
+  --bg-surface: #12121A;
+  --bg-elevated: #1A1A26;
+  --border: #2A2A3A;
+  --border-bright: #3A3A50;
+  --accent: #2563EB;
+  --accent-glow: rgba(37, 99, 235, 0.15);
+  --accent-hover: rgba(37, 99, 235, 0.12);
+  --status-green: #22C55E;
+  --status-red: #EF4444;
+  --status-amber: #F59E0B;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #475569;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2A2A3A;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3A3A50;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2A2A3A transparent;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.4; }
+}
+
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+.animate-blink-cursor {
+  animation: blink-cursor 0.6s step-end infinite;
+}
+.animate-spin-custom {
+  animation: spin 1s linear infinite;
+}
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out;
+}
+.animate-slide-right {
+  animation: slide-right 0.2s ease-out;
+}
+
+/* Custom scrollbar helper class */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2A2A3A;
+  border-radius: 2px;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  input, textarea, select {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  .section-label {
+    @apply text-[10px] font-semibold tracking-widest uppercase;
+    color: var(--text-muted);
+  }
+  .card {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .nav-item-active {
+    border-left: 2px solid var(--accent);
+    background-color: var(--accent-hover);
+    color: var(--text-primary);
+  }
+  .nav-item-inactive {
+    border-left: 2px solid transparent;
+    color: var(--text-secondary);
+  }
+  .nav-item-inactive:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+  }
+  .btn-primary {
+    background-color: var(--accent);
+    color: white;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .btn-ghost:hover {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+  }
+  .status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .mono-id {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+}

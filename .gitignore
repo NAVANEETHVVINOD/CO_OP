@@ -8,8 +8,13 @@ __pycache__/
 dist/
 build/
 *.db
+.venv/
+venv/
+services/api/.venv/
 services/api/test.db
 services/api/uploads/
+.coverage
+htmlcov/
 
 # Node / Next.js
 node_modules/
@@ -17,6 +22,7 @@ node_modules/
 out/
 *.tsbuildinfo
 .env.local
+.turbo/
 
 # Rust / Tauri
 target/

@@ -8,15 +8,18 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-# Services to monitor with their health endpoints
-SERVICES = {
-    "postgres":  {"type": "internal"},  # checked via SQLAlchemy
-    "redis":     {"type": "internal"},  # checked via redis ping
-    "qdrant":    {"url": "http://qdrant:6333/healthz"},
-    "minio":     {"url": "http://minio:9000/minio/health/live"},
-    "ollama":    {"url": "http://ollama:11434/api/tags"},
-    "litellm":   {"url": "http://litellm:4000/health"},
-}
+def _get_services():
+    """Get service URLs from settings."""
+    from app.config import get_settings
+    settings = get_settings()
+    return {
+        "postgres":  {"type": "internal"},  # checked via SQLAlchemy
+        "redis":     {"type": "internal"},  # checked via redis ping
+        "qdrant":    {"url": f"{settings.QDRANT_URL}/healthz"} if settings.QDRANT_URL else {"type": "skip"},
+        "minio":     {"url": f"http://{settings.MINIO_URL}/minio/health/live"},
+        "ollama":    {"url": f"{settings.OLLAMA_URL}/api/tags"},
+        "litellm":   {"url": f"{settings.LITELLM_URL}/health"} if settings.LITELLM_URL else {"type": "skip"},
+    }
 
 
 async def _check_service_http(name: str, url: str) -> bool:
@@ -62,8 +65,9 @@ async def run_system_monitor() -> None:
     results["redis"] = await _check_redis()
 
     # HTTP-based services
-    for name, config in SERVICES.items():
-        if config.get("type") == "internal":
+    services = _get_services()
+    for name, config in services.items():
+        if config.get("type") in ("internal", "skip"):
             continue
         url = config.get("url", "")
         results[name] = await _check_service_http(name, url)

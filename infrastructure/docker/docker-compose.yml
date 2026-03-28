@@ -17,7 +17,7 @@
 
 services:
   postgres:
-    image: postgres:16.3-alpine           # pinned minor version
+    image: pgvector/pgvector:pg16           # previously pinned minor version, but needed pgvector
     environment:
       POSTGRES_DB: coop
       POSTGRES_USER: coop
@@ -69,6 +69,10 @@ services:
           memory: 64M
     cap_drop:
       - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - CHOWN
     security_opt:
       - no-new-privileges:true
 
@@ -76,8 +80,8 @@ services:
     image: minio/minio:RELEASE.2024-06-04T19-20-08Z   # pinned release tag
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -96,12 +100,16 @@ services:
           memory: 128M
     cap_drop:
       - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - CHOWN
     security_opt:
       - no-new-privileges:true
 
   litellm:
     # PINNED — do NOT use main-latest. See security note at top of file.
-    image: ghcr.io/berriai/litellm:main-stable
+    image: ghcr.io/berriai/litellm:main
     ports:
       - "4000:4000"
     volumes:
@@ -110,6 +118,7 @@ services:
     environment:
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-dummy}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
       interval: 15s
@@ -127,6 +136,10 @@ services:
       - no-new-privileges:true
 
   co-op-api:
+    # For local development, build from source
+    # For production, use specific version tag:
+    #   image: ghcr.io/navaneethvvinod/co-op-api:v1.0.3
+    # Never use 'latest' tag in production
     build:
       context: ../../services/api
       dockerfile: Dockerfile
@@ -135,19 +148,26 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://coop:${DB_PASS}@postgres:5432/coop
       DB_PASS: ${DB_PASS}
-      REDIS_URL: redis://redis:6379
-      LITELLM_URL: http://litellm:4000
-      MINIO_URL: minio:9000
-      MINIO_ENDPOINT: minio:9000
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      REDIS_URL: ${REDIS_URL}
+      LITELLM_URL: ${LITELLM_URL}
+      MINIO_URL: ${MINIO_URL}
+      MINIO_ENDPOINT: ${MINIO_URL}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       SECRET_KEY: ${SECRET_KEY}
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      ENVIRONMENT: production
-      USE_QDRANT: "false"
-      QDRANT_URL: http://qdrant:6333
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_ADMIN_CHAT_ID: ${TELEGRAM_ADMIN_CHAT_ID}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      ENVIRONMENT: ${ENVIRONMENT}
+      USE_QDRANT: ${USE_QDRANT}
+      QDRANT_URL: ${QDRANT_URL}
+      OLLAMA_URL: ${OLLAMA_URL}
+      API_BASE_URL: ${API_BASE_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
+      COOP_SIMULATION_MODE: ${COOP_SIMULATION_MODE}
+      LOG_LEVEL: ${LOG_LEVEL}
+      SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
       postgres:
         condition: service_healthy
@@ -177,13 +197,20 @@ services:
       - /tmp
 
   co-op-web:
+    # For local development, build from source
+    # For production, use specific version tag:
+    #   image: ghcr.io/navaneethvvinod/co-op-web:v1.0.3
+    # Never use 'latest' tag in production
     build:
       context: ../../apps/web
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_DEFAULT_EMAIL: ${NEXT_PUBLIC_DEFAULT_EMAIL}
+      NEXT_PUBLIC_DEFAULT_PASSWORD: ${NEXT_PUBLIC_DEFAULT_PASSWORD}
+      NEXT_PUBLIC_ENVIRONMENT: ${NEXT_PUBLIC_ENVIRONMENT}
     depends_on:
       co-op-api:
         condition: service_started

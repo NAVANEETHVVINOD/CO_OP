@@ -27,6 +27,30 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Log configuration on startup
+    app_settings = get_settings()
+    logger.info("=" * 60)
+    logger.info("Co-Op API Starting")
+    logger.info("=" * 60)
+    logger.info(f"Environment: {app_settings.ENVIRONMENT}")
+    logger.info(f"Log Level: {app_settings.LOG_LEVEL}")
+    logger.info(f"Simulation Mode: {app_settings.COOP_SIMULATION_MODE}")
+    logger.info(f"Database: {app_settings.DATABASE_URL.split('@')[-1] if '@' in app_settings.DATABASE_URL else 'configured'}")
+    logger.info(f"Redis: {app_settings.REDIS_URL}")
+    logger.info(f"MinIO: {app_settings.MINIO_URL}")
+    logger.info(f"Ollama: {app_settings.OLLAMA_URL}")
+    logger.info(f"API Base URL: {app_settings.API_BASE_URL}")
+    logger.info(f"Frontend URL: {app_settings.FRONTEND_URL}")
+    if app_settings.LITELLM_URL:
+        logger.info(f"LiteLLM: {app_settings.LITELLM_URL}")
+    if app_settings.QDRANT_URL:
+        logger.info(f"Qdrant: {app_settings.QDRANT_URL}")
+    if app_settings.TELEGRAM_BOT_TOKEN:
+        logger.info("Telegram Bot: Enabled")
+    if app_settings.SENTRY_DSN:
+        logger.info("Sentry: Enabled")
+    logger.info("=" * 60)
+    
     # Startup: Connect to DB, create tables if needed (simplifying for Phase 0)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -140,7 +164,7 @@ Instrumentator().instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[app_settings.FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -80,8 +80,10 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     """Handle /status — show system health."""
     try:
         import httpx
+        from app.config import get_settings
+        settings = get_settings()
         async with httpx.AsyncClient() as client:
-            resp = await client.get("http://localhost:8000/health", timeout=5.0)
+            resp = await client.get(f"{settings.API_BASE_URL}/health", timeout=5.0)
             if resp.status_code == 200:
                 data = resp.json()
                 lines = ["📊 *System Status*\n"]
@@ -210,8 +212,10 @@ async def cmd_budget(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     """Handle /budget — show token budget status."""
     try:
         import httpx
+        from app.config import get_settings
+        settings = get_settings()
         async with httpx.AsyncClient() as client:
-            resp = await client.get("http://localhost:8000/v1/costs", timeout=5.0)
+            resp = await client.get(f"{settings.API_BASE_URL}/v1/costs", timeout=5.0)
             if resp.status_code == 200:
                 data = resp.json()
                 today = data.get("today", {})

@@ -14,12 +14,12 @@ co-op/                          ← Turborepo monorepo root
 ├── packages/                   ← Shared packages (empty Stage 1)
 ├── docs/                       ← Architecture docs + stage guides
 │   ├── rules/                  ← AI IDE constraint files (.mdc)
-│   ├── CO_OP_SOLO_DEVELOPER_ARCHITECTURE.md
-│   ├── CO_OP_SOLO_TASKS_UPDATED.md
-│   ├── stage1_implementation.md
-│   ├── stage2_implementation.md
-│   ├── stage3_implementation.md
-│   └── stage4_implementation.md
+│   ├── stages/                 ← Phase-specific documentation
+│   │   ├── phase-0/            ← Current phase (Stage 1)
+│   │   ├── phase-1/            ← Stage 2 docs
+│   │   ├── phase-2/            ← Stage 3 docs
+│   │   └── phase-3/            ← Stage 4 docs
+│   └── archive/                ← Historical documentation
 ├── turbo.json
 ├── pnpm-workspace.yaml
 ├── package.json
@@ -164,6 +164,8 @@ infrastructure/docker/
 apps/web/.env.local             ← NEXT_PUBLIC_API_URL=http://localhost:8000
 apps/web/tsconfig.json          ← strict: true
 services/api/pyproject.toml     ← Python dependencies
+infrastructure/docker/.env      ← Docker environment variables
+infrastructure/docker/.env.example ← Environment variable template
 .coop/auto-approval.yaml       ← Stage 3: Auto-approval rules
 .github/workflows/prompt-quality.yml  ← Stage 3: Prompt CI
 ```
