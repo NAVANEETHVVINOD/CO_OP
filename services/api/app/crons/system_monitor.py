@@ -16,7 +16,7 @@ def _get_services():
         "postgres":  {"type": "internal"},  # checked via SQLAlchemy
         "redis":     {"type": "internal"},  # checked via redis ping
         "qdrant":    {"url": f"{settings.QDRANT_URL}/healthz"} if settings.QDRANT_URL else {"type": "skip"},
-        "minio":     {"url": f"{settings.MINIO_URL}/minio/health/live"},
+        "minio":     {"url": f"http://{settings.MINIO_URL}/minio/health/live"},
         "ollama":    {"url": f"{settings.OLLAMA_URL}/api/tags"},
         "litellm":   {"url": f"{settings.LITELLM_URL}/health"} if settings.LITELLM_URL else {"type": "skip"},
     }

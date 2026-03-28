@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import Tenant, User
 from app.core.security import get_password_hash, create_access_token
 
-async def seed_test_user(db: AsyncSession, email: str | None = None, password: str = "testpass"):
+async def seed_test_user(db: AsyncSession, email: str | None = None, password: str = "Test123!"):
     """Seed a test user with a unique email. Returns (user, jwt_token)."""
     if email is None:
         email = f"test_{uuid.uuid4().hex[:8]}@co-op.local"

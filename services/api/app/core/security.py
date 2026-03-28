@@ -10,16 +10,21 @@ from app.config import get_settings
 
 settings = get_settings()
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__truncate_error=False
+)
 
 ALGORITHM = "HS256"
 
-def normalize_password(password: str) -> str:
+def normalize_password(password: str) -> bytes:
     """
     Pre-hash password using SHA256 to avoid bcrypt's 72-byte limit.
+    Returns raw bytes (not hex) for bcrypt compatibility.
     This is a standard practice for handling long passwords with bcrypt.
     """
-    return hashlib.sha256(password.encode()).hexdigest()
+    return hashlib.sha256(password.encode()).digest()
 
 def create_access_token(subject: Union[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     if expires_delta:

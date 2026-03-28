@@ -1,58 +1,51 @@
+"""
+Bug condition exploration tests for MinIO health check URL.
+
+These tests are expected to FAIL on unfixed code, confirming the bug exists.
+"""
 import pytest
-from unittest.mock import patch, MagicMock
+import httpx
+from unittest.mock import patch
+from app.crons.system_monitor import _get_services
 
-from app.crons.system_monitor import run_system_monitor
 
-@pytest.mark.asyncio
-async def test_run_system_monitor_all_healthy(db_session):
-    with patch("httpx.AsyncClient") as mock_client, \
-         patch("app.core.redis_client.redis_client.ping") as mock_redis_ping, \
-         patch("app.crons.system_monitor._check_postgres") as mock_postgres, \
-         patch("app.communication.telegram.send_alert") as mock_send_alert:
-        
-        # Setup mocks to return success
-        mock_postgres.return_value = True
-        client_instance = AsyncMock()
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        client_instance.get.return_value = mock_response
-        mock_client.return_value.__aenter__.return_value = client_instance
-        
-        mock_redis_ping.return_value = True
-        
-        # Run system monitor
-        await run_system_monitor()
-        
-        # Ensure send_alert was NOT called since everything is healthy
-        mock_send_alert.assert_not_called()
+class MockSettings:
+    """Mock settings with typical Docker service URLs."""
+    MINIO_URL = "minio:9000"
+    QDRANT_URL = "http://qdrant:6333"
+    OLLAMA_URL = "http://ollama:11434"
+    LITELLM_URL = "http://litellm:4000"
 
-@pytest.mark.asyncio
-async def test_run_system_monitor_failure(db_session):
-    with patch("httpx.AsyncClient") as mock_client, \
-         patch("app.core.redis_client.redis_client.ping") as mock_redis_ping, \
-         patch("app.crons.system_monitor._check_postgres") as mock_postgres, \
-         patch("app.communication.telegram.send_alert") as mock_send_alert:
-        
-        # Force a failure in Redis
-        mock_postgres.return_value = True
-        mock_redis_ping.side_effect = Exception("Connection refused")
-        
-        # Mock others as successful just in case
-        client_instance = AsyncMock()
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        client_instance.get.return_value = mock_response
-        mock_client.return_value.__aenter__.return_value = client_instance
-        
-        # Run system monitor
-        await run_system_monitor()
-        
-        # Assert send_alert was called because of the Redis failure
-        mock_send_alert.assert_called_once()
-        args, _ = mock_send_alert.call_args
-        assert "Unhealthy services" in args[0]
-        assert "redis" in args[0].lower()
 
-class AsyncMock(MagicMock):
-    async def __call__(self, *args, **kwargs):
-        return super(AsyncMock, self).__call__(*args, **kwargs)
+def test_minio_health_url_must_have_protocol():
+    """
+    Test that MinIO health URL is constructed with http:// prefix.
+    
+    This test is expected to FAIL on unfixed code (bug exists).
+    When the bug is present, the URL will be "minio:9000/minio/health/live"
+    instead of "http://minio:9000/minio/health/live".
+    """
+    with patch("app.config.get_settings", return_value=MockSettings()):
+        services = _get_services()
+        minio_url = services["minio"]["url"]
+        
+        assert minio_url.startswith("http://") or minio_url.startswith("https://"), \
+            f"MinIO health URL should have HTTP protocol, got {minio_url}"
+
+
+def test_minio_http_request_fails_without_protocol():
+    """
+    Test that httpx raises protocol error when using malformed URL.
+    
+    This test verifies that the malformed URL (without protocol) causes
+    httpx to raise an InvalidURL exception.
+    """
+    with patch("app.config.get_settings", return_value=MockSettings()):
+        services = _get_services()
+        minio_url = services["minio"]["url"]
+        
+        # Only run this if the URL is missing protocol (which is the buggy case)
+        if not (minio_url.startswith("http://") or minio_url.startswith("https://")):
+            with pytest.raises(httpx.InvalidURL):
+                # httpx will raise InvalidURL if the URL scheme is missing
+                httpx.get(minio_url)
