@@ -3,7 +3,6 @@ Preservation property tests for system monitor.
 
 These tests should PASS on unfixed code, ensuring other services are unaffected.
 """
-import pytest
 from unittest.mock import patch
 from app.crons.system_monitor import _get_services
 

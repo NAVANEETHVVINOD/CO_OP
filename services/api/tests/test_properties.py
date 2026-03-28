@@ -3,7 +3,6 @@
 Feature: seo-documentation-test-coverage
 These tests use Hypothesis to validate configuration properties across the codebase.
 """
-import os
 import re
 from pathlib import Path
 from typing import List
