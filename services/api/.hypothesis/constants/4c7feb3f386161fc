@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\routers\chat.py
+# hypothesis_version: 6.148.7
+
+[0.0, 0.03, 400, '/stream', '/v1/chat', 'Cache-Control', 'Chat', 'Content-Type', 'No answer generated.', 'chat_history', 'chunk_index', 'citation', 'content', 'conversation_id', 'cost_usd', 'data', 'document_id', 'done', 'error', 'event', 'final_answer', 'no-cache', 'page', 'question', 'rerank_score', 'reranked_docs', 'retrieved_docs', 'rrf_score', 'score', 'source', 'tenant_id', 'text/event-stream', 'token', 'total_chunks', 'unknown']

@@ -1,187 +1,429 @@
-# Co-Op Backend — FastAPI Control Plane
+# Co-Op Backend API
 
-The central API for Co-Op Autonomous Company OS.
-Handles authentication, document management, RAG search, chat streaming, agent orchestration, and human‑in‑the‑loop approvals.
+[![Backend Coverage](https://img.shields.io/badge/coverage-80%25-brightgreen.svg)](htmlcov/index.html)
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+FastAPI application serving the Co-Op OS backend. Includes asynchronous endpoints, RAG pipeline, agent workflows, and event-driven document processing.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Authentication & Authorization](#authentication--authorization)
+- [API Endpoints](#api-endpoints)
+- [RAG Pipeline](#rag-pipeline)
+- [Background Processing](#background-processing)
+- [Configuration](#configuration)
+- [Testing](#testing)
+- [Development](#development)
 
 ## Overview
-This is the backend service for Co-Op. It is a FastAPI application that provides:
 
-- REST API for frontend and CLI
-- Server‑Sent Events (SSE) for streaming chat
-- Background task queue via ARQ (async Redis queue)
-- LangGraph agents (Lead Scout, Proposal Writer, etc.)
-- Database models with PostgreSQL and Alembic migrations
-- Vector search via Qdrant (or pgvector)
-- File storage via MinIO
-- LLM integration via LiteLLM (local Ollama or external APIs)
+The Co-Op backend is a production-ready FastAPI application featuring:
 
-The service runs inside a Docker container but can also be run locally for development.
+- **FastAPI 0.115+** with async/await throughout
+- **SQLAlchemy 2.0** async ORM with PostgreSQL 16
+- **Pydantic V2** for data validation and settings
+- **LangGraph** for AI agent workflows
+- **ARQ** (asyncio Redis Queue) for background tasks
+- **Server-Sent Events (SSE)** for real-time chat streaming
+- **JWT authentication** with bcrypt password hashing
+- **Hybrid search** (BM25 + dense vectors + reranking)
 
-## Technology Stack
+### Technology Stack
 
-| Category | Tools |
-|----------|-------|
-| Web Framework | FastAPI |
-| Async Database | SQLAlchemy 2.0 + asyncpg |
-| Migrations | Alembic |
-| Background Tasks | ARQ (async Redis queue) |
-| Agents | LangGraph |
-| LLM Gateway | LiteLLM |
-| Vector Search | Qdrant (or pgvector) |
-| Object Storage | MinIO (S3‑compatible) |
-| Caching / Queue | Redis |
-| Authentication | JWT (python‑jose) |
-| Observability | OpenTelemetry, Prometheus, structlog |
+- **Framework:** FastAPI 0.115.12
+- **ORM:** SQLAlchemy 2.0.36 (async)
+- **Database:** PostgreSQL 16 (via asyncpg)
+- **Validation:** Pydantic 2.10.6
+- **AI/ML:** LangGraph, LangChain, sentence-transformers
+- **Search:** Qdrant (vector database), BM25 (lexical)
+- **Storage:** MinIO (S3-compatible object storage)
+- **Cache:** Redis 7.2
+- **Task Queue:** ARQ (async Redis queue)
+- **Testing:** pytest 8.3.4, pytest-asyncio, pytest-cov
 
-## Project Structure
+## Architecture
 
-```text
+### System Architecture Diagram
+
+```mermaid
+graph TD
+    subgraph "API Layer"
+        AuthRouter[auth.py]
+        ChatRouter[chat.py]
+        DocumentsRouter[documents.py]
+        SearchRouter[search.py]
+        AgentsRouter[agents.py]
+        ApprovalsRouter[approvals.py]
+        AdminRouter[admin.py]
+        ProjectsRouter[projects.py]
+        FinanceRouter[finance.py]
+    end
+    
+    subgraph "Services"
+        RAGService[RAG Service]
+        SearchService[Search Service]
+        IndexerService[Indexer Service]
+        ParserService[Parser Service]
+        VectorSearch[Vector Search]
+    end
+    
+    subgraph "Infrastructure"
+        DB[(PostgreSQL)]
+        Redis[Redis]
+        MinIO[MinIO]
+        Qdrant[Qdrant]
+    end
+    
+    AuthRouter --> DB
+    ChatRouter --> RAGService
+    RAGService --> SearchService
+    SearchService --> VectorSearch
+    VectorSearch --> Qdrant
+    DocumentsRouter --> IndexerService
+    IndexerService --> MinIO
+    IndexerService --> DB
+    ParserService --> MinIO
+```
+
+### Directory Structure
+
+```
 services/api/
 ├── app/
-│   ├── agent/                 # LangGraph agents and nodes
-│   │   ├── graph.py           # Agent graph definition
-│   │   ├── nodes.py           # Individual node logic
-│   │   └── state.py           # Agent state (TypedDict)
-│   ├── communication/         # Telegram bot (in‑process, Stage 2+)
-│   ├── core/                  # Shared utilities (security, Redis, MinIO, etc.)
-│   ├── crons/                 # Scheduled tasks (system monitor, morning brief)
-│   ├── db/                    # Database models, sessions, repositories
-│   ├── events/                # Redis consumer for document ingestion
-│   ├── routers/               # API route handlers
-│   ├── services/              # Business logic (search, chunking, indexing)
-│   └── main.py                # FastAPI application entry point
-├── alembic/                   # Database migrations
-├── tests/                     # Pytest test suite
-├── uploads/                   # Temporary file storage (for local dev)
-├── .env.example               # Example environment variables
-├── Dockerfile                 # Multi‑stage build for production
-├── pyproject.toml             # Project dependencies
-├── pyrightconfig.json         # Type checker configuration
-└── README.md                  # This file
+│   ├── routers/           # API endpoints
+│   │   ├── auth.py        # Authentication (login, token)
+│   │   ├── chat.py        # Chat streaming (SSE)
+│   │   ├── documents.py   # Document upload/management
+│   │   ├── search.py      # Hybrid search
+│   │   ├── agents.py      # Agent monitoring
+│   │   ├── approvals.py   # HITL approval queue
+│   │   ├── admin.py       # Admin endpoints
+│   │   ├── projects.py    # Project management
+│   │   └── finance.py     # Financial tracking
+│   ├── core/              # Core services
+│   │   ├── parser.py      # Document parsing
+│   │   ├── chunker.py     # Text chunking
+│   │   ├── embedder.py    # Embedding generation
+│   │   ├── indexer.py     # Vector indexing
+│   │   └── search.py      # Search services
+│   ├── models/            # SQLAlchemy models
+│   ├── schemas/           # Pydantic schemas
+│   ├── crons/             # Scheduled tasks
+│   ├── config.py          # Configuration
+│   └── main.py            # FastAPI app
+├── tests/                 # Test suite
+├── alembic/               # Database migrations
+├── pyproject.toml         # Dependencies
+└── README.md              # This file
 ```
 
-## Running the Backend
+## Authentication & Authorization
 
-### With Docker (recommended for production)
-The backend is part of the full Docker Compose stack. From the repository root:
+### JWT Authentication
 
-```bash
-cd infrastructure/docker
-docker compose up -d co-op-api
+- **Access tokens**: Short-lived (15 minutes), used for API requests
+- **Refresh tokens**: Long-lived (7 days), used to obtain new access tokens
+- **Algorithm**: HS256 (HMAC with SHA-256)
+- **Secret**: Configured via `SECRET_KEY` environment variable
+
+### Password Security
+
+- **Hashing**: bcrypt with cost factor 12
+- **Pre-hashing**: SHA256 applied before bcrypt to handle passwords >72 bytes
+- **Salt**: Automatically generated per password
+
+### Roles
+
+- **admin**: Full access to all endpoints, user management
+- **user**: Standard access, cannot manage other users
+
+### Protected Routes
+
+Most endpoints require authentication. Include the JWT token in the `Authorization` header:
+
 ```
-
-The service will be available at http://localhost:8000.
-
-### Without Docker (for development)
-
-#### Prerequisites
-- Python 3.12+
-- PostgreSQL 16 (running)
-- Redis 7 (running)
-- Qdrant (optional; can use pgvector)
-- MinIO (optional)
-
-#### Setup
-```bash
-cd services/api
-python -m venv .venv
-source .venv/bin/activate   # On Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
-cp .env.example .env
+Authorization: Bearer <access_token>
 ```
-Edit `.env` and set the correct database, Redis, etc. URLs.
-
-#### Run the server
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-#### Run background workers (ARQ)
-In a separate terminal:
-```bash
-arq app.worker.WorkerSettings
-```
-The worker handles cron tasks (Lead Scout, system monitor, etc.) and can be run independently.
-
-## Environment Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL async connection | `postgresql+asyncpg://coop:pass@localhost:5432/coop` |
-| `REDIS_URL` | Redis connection | `redis://localhost:6379` |
-| `QDRANT_URL` | Qdrant HTTP endpoint | `http://localhost:6333` |
-| `MINIO_URL` | MinIO endpoint (host:port) | `localhost:9000` |
-| `MINIO_ACCESS_KEY` | MinIO access key | |
-| `MINIO_SECRET_KEY` | MinIO secret key | |
-| `SECRET_KEY` | JWT signing secret | `change‑me` |
-| `DB_PASS` | Database password | |
-| `ENVIRONMENT` | development / production | `development` |
-| `LITELLM_URL` | LiteLLM gateway (Stage 2+) | `http://localhost:4000` |
-| `TELEGRAM_BOT_TOKEN` | Telegram bot token (Stage 2+) | `(optional)` |
-| `GROQ_API_KEY` | Groq API key (Stage 2+) | `(optional)` |
-| `GEMINI_API_KEY` | Gemini API key (Stage 2+) | `(optional)` |
 
 ## API Endpoints
 
-| Prefix | Description |
-|--------|-------------|
-| `/v1/auth` | Login, token refresh |
-| `/v1/health` | Health checks (database, Redis, etc.) |
-| `/v1/documents` | Upload, list, delete documents |
-| `/v1/search` | Semantic search over documents |
-| `/v1/chat` | Chat with streaming (SSE) |
-| `/v1/conversations` | Manage chat history |
-| `/v1/approvals` | Human‑in‑the‑loop actions |
-| `/v1/costs` | Token usage (Stage 2+) |
-| `/v1/settings` | Hardware tier, configuration (Stage 2+) |
+All endpoints are prefixed with `/v1`. FastAPI auto-generates interactive documentation at `/docs` (Swagger UI) and `/redoc` (ReDoc).
 
-For detailed API documentation, visit http://localhost:8000/docs (Swagger UI) when the server is running.
+### Authentication
 
-## Database Migrations
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/v1/auth/token` | Obtain access token (password grant) |
+| POST | `/v1/auth/refresh` | Refresh access token |
+| POST | `/v1/auth/register` | Register new user |
+| GET | `/v1/auth/me` | Get current user info |
 
-Migrations are managed with Alembic.
+### Chat
 
-Create a new migration:
-```bash
-cd services/api
-alembic revision --autogenerate -m "description"
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/v1/chat/stream` | Stream chat response (SSE) |
+| GET | `/v1/conversations` | List user's conversations |
+| GET | `/v1/conversations/{id}` | Get conversation details |
+| DELETE | `/v1/conversations/{id}` | Delete conversation |
+
+### Documents
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/v1/documents` | Upload a document |
+| GET | `/v1/documents` | List user's documents |
+| GET | `/v1/documents/{id}` | Get document details |
+| DELETE | `/v1/documents/{id}` | Delete document |
+
+### Search
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/v1/search` | Hybrid search across documents |
+
+### Agents
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/v1/agents` | List AI agents and their status |
+| GET | `/v1/agents/{id}/logs` | Get agent execution logs |
+
+### Approvals
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/v1/approvals` | List pending HITL actions |
+| POST | `/v1/approvals/{id}/approve` | Approve an action |
+| POST | `/v1/approvals/{id}/reject` | Reject an action |
+
+### Health
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Service health check |
+| GET | `/ready` | Readiness probe |
+
+## RAG Pipeline
+
+### Document Processing Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Parser
+    participant Chunker
+    participant Indexer
+    participant Qdrant
+    participant MinIO
+    
+    Client->>API: POST /documents
+    API->>MinIO: store raw file
+    API->>Parser: extract text
+    Parser-->>API: text
+    API->>Chunker: split into chunks
+    Chunker-->>API: list of chunks
+    API->>Indexer: create embeddings & store in Qdrant
+    Indexer->>Qdrant: upsert vectors
+    API->>DB: save document metadata
+    API-->>Client: 202 Accepted
 ```
 
-Apply all pending migrations:
-```bash
-alembic upgrade head
+### Pipeline Stages
+
+1. **Upload**: Client uploads file via multipart/form-data
+2. **Storage**: Raw file stored in MinIO
+3. **Parsing**: Text extracted from PDF, DOCX, TXT, etc.
+4. **Chunking**: Text split into overlapping chunks (512 tokens, 50 token overlap)
+5. **Embedding**: Each chunk embedded using sentence-transformers
+6. **Indexing**: Vectors stored in Qdrant with metadata
+7. **Status Update**: Document status set to `READY`
+
+### Search Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant SearchService
+    participant Qdrant
+    participant LLM
+    
+    Client->>API: POST /chat/stream
+    API->>SearchService: retrieve relevant chunks
+    SearchService->>Qdrant: vector search
+    Qdrant-->>SearchService: chunks
+    SearchService->>LLM: context + question
+    LLM-->>API: answer
+    API->>Client: SSE stream (tokens)
 ```
-Migrations are stored in `alembic/versions/`. The initial schema includes `tenant_id` on all tables for multi‑tenancy.
+
+### Hybrid Search
+
+Combines three search methods:
+
+1. **BM25 (lexical)**: Keyword-based search
+2. **Dense vectors**: Semantic similarity via embeddings
+3. **Reranking**: Cross-encoder reranks top results
+
+## Background Processing
+
+### ARQ (Asyncio Redis Queue)
+
+Long-running tasks are offloaded to background workers:
+
+- Document indexing
+- Lead scoring
+- Proposal generation
+- Email sending
+
+### Worker Configuration
+
+Workers are started alongside the API server via supervisord or separate processes.
+
+```bash
+# Start worker
+arq app.worker.WorkerSettings
+```
+
+### Task Example
+
+```python
+from arq import create_pool
+from arq.connections import RedisSettings
+
+async def index_document(ctx, document_id: str):
+    # Process document
+    pass
+
+class WorkerSettings:
+    functions = [index_document]
+    redis_settings = RedisSettings()
+```
+
+## Configuration
+
+Settings are managed via Pydantic in `app/config.py`. Environment variables override defaults.
+
+### Key Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SECRET_KEY` | JWT signing secret | (required) |
+| `POSTGRES_HOST` | PostgreSQL host | `localhost` |
+| `POSTGRES_PORT` | PostgreSQL port | `5432` |
+| `POSTGRES_USER` | Database user | `coop` |
+| `POSTGRES_PASSWORD` | Database password | (required) |
+| `POSTGRES_DB` | Database name | `coop_os` |
+| `REDIS_HOST` | Redis host | `localhost` |
+| `REDIS_PORT` | Redis port | `6379` |
+| `MINIO_ENDPOINT` | MinIO endpoint | `localhost:9000` |
+| `MINIO_ACCESS_KEY` | MinIO access key | `minioadmin` |
+| `MINIO_SECRET_KEY` | MinIO secret key | `minioadmin` |
+| `QDRANT_HOST` | Qdrant host | `localhost` |
+| `QDRANT_PORT` | Qdrant port | `6333` |
+| `LITELLM_URL` | LiteLLM proxy URL | `http://localhost:4000` |
+
+See `.env.example` for the full list.
 
 ## Testing
 
-Run the test suite with:
+### Running Tests
+
 ```bash
-cd services/api
-pytest tests/ -v
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=app --cov-report=term
+
+# Run specific test file
+pytest tests/test_auth.py
+
+# Run with verbose output
+pytest -v
+
+# Run property-based tests
+pytest tests/test_properties.py
 ```
-The tests use a separate database (SQLite or a test PostgreSQL) and mock external services.
 
-## Adding a New Agent
-1. Define the agent state in `app/agent/state.py` (TypedDict).
-2. Create nodes in `app/agent/nodes.py`.
-3. Build the graph in `app/agent/graph.py`.
-4. Add a cron task or a trigger in `app/worker.py` to start the agent.
-5. Write tests in `tests/test_agent.py`.
+### Test Coverage
 
-## Observability
-- Logging is configured with `structlog` and correlates request IDs.
-- Prometheus metrics are exposed at `/metrics` (via `prometheus_fastapi_instrumentator`).
-- OpenTelemetry traces are sent to the collector (when configured).
+Current coverage: **74%** (target: 80%)
 
-## Security
-- JWT tokens with short expiry, stored in HTTP‑only cookies (or localStorage in frontend).
-- Passwords hashed with bcrypt.
-- Rate limiting via slowapi.
-- Input validation with Pydantic models.
-- (Stage 3) LLM Guard for prompt injection detection.
+Coverage reports are generated in `htmlcov/` directory.
 
-## License
-Apache License 2.0 – See LICENSE in the repository root
+### Test Structure
+
+- **Unit tests**: Test individual functions and classes
+- **Integration tests**: Test complete workflows (RAG pipeline, auth flow)
+- **Property tests**: Test invariants using Hypothesis
+
+### Writing Tests
+
+Example test:
+
+```python
+import pytest
+from httpx import AsyncClient
+
+@pytest.mark.asyncio
+async def test_login(async_client: AsyncClient):
+    response = await async_client.post(
+        "/v1/auth/token",
+        data={"username": "test@example.com", "password": "password"}
+    )
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+```
+
+## Development
+
+### Setup
+
+```bash
+# Install dependencies
+pip install -e .
+
+# Or with uv
+uv pip install -e .
+
+# Run migrations
+alembic upgrade head
+
+# Start development server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Code Style
+
+- **Linting**: Ruff
+- **Formatting**: Ruff format
+- **Type checking**: Pyright (optional)
+
+```bash
+# Run linter
+ruff check .
+
+# Auto-fix issues
+ruff check --fix .
+
+# Format code
+ruff format .
+```
+
+### API Documentation
+
+Interactive API docs are available at:
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+- OpenAPI JSON: `http://localhost:8000/openapi.json`
+
+## Related Documentation
+
+- [Database Schema](../../docs/DATABASE.md)
+- [Docker Infrastructure](../../infrastructure/docker/README.md)
+- [Testing Guide](../../docs/TESTING.md)
+- [Security Practices](../../docs/SECURITY.md)

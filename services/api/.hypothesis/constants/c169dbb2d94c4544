@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\events\consumer.py
+# hypothesis_version: 6.148.7
+
+[512, 5000, '.', '.json', '>', 'BUSYGROUP', 'FAILED', 'READY', '__main__', 'application/json', 'chunk_index', 'doc_ingestion_group', 'document_id', 'file_path', 'filename', 'parsed-chunks', 'raw-documents', 'retries', 'tenant_id', 'text', 'utf-8', 'worker_1']

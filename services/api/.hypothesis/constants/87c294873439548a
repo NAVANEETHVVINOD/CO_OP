@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\agent\lead_scout.py
+# hypothesis_version: 6.148.7
+
+[0.0, 15.0, 30.0, 100.0, 100, 200, 2000, 3000, './/item', 'Accept', 'No jobs found.', 'User-Agent', '\\"score\\":\\s*(\\d+)', 'ai', 'choices', 'content', 'description', 'docker', 'fastapi', 'json_object', 'link', 'max_tokens', 'message', 'messages', 'ml', 'model', 'new', 'next.js', 'postgresql', 'python', 'q', 'rag', 'recency', 'redis', 'response_format', 'role', 'score', 'simple', 'sort', 'system', 'temperature', 'title', 'type', 'typescript', 'upwork', 'url', 'user']

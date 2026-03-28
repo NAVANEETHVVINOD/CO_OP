@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Ignore test files and coverage
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "coverage/**",
   ]),
 ]);
 

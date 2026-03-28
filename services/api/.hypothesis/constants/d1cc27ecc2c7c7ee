@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\crons\system_monitor.py
+# hypothesis_version: 6.148.7
+
+[5.0, 200, 'SELECT 1', 'internal', 'litellm', 'minio', 'ollama', 'postgres', 'qdrant', 'redis', 'skip', 'type', 'url']

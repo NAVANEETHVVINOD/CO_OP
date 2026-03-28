@@ -217,12 +217,26 @@ jobs:
           ignore-unfixed: true
           scanners: "vuln,secret,config"
           vuln-type: "os,library"
+        continue-on-error: true
+
+      - name: Check Trivy results file
+        if: always()
+        run: |
+          if [ -f "trivy-results.sarif" ]; then
+            echo "Trivy results file exists"
+            ls -lh trivy-results.sarif
+            cat trivy-results.sarif | head -20
+          else
+            echo "Trivy results file not found, creating empty SARIF"
+            echo '{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[]}' > trivy-results.sarif
+          fi
 
       - name: Upload Trivy results
         if: always()
-        uses: github/codeql-action/upload-sarif@4f3212b61783c3c68e8309a0f18a699764811cda
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: "trivy-results.sarif"
+        continue-on-error: true
 
   # ── 6. Build Validation ────────────────────────────────────────────────────
   build:

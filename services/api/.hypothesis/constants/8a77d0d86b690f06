@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\routers\conversations.py
+# hypothesis_version: 6.148.7
+
+[404, '/conversations', '/v1/chat', 'Conversations', 'citations', 'content', 'created_at', 'deleted', 'id', 'message_count', 'role', 'status', 'title']

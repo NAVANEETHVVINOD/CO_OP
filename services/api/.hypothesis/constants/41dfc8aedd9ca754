@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\services\parser.py
+# hypothesis_version: 6.148.7
+
+['.', 'csv', 'doc', 'docx', 'json', 'md', 'pdf', 'replace', 'txt', 'utf-8']

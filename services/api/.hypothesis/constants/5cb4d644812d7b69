@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\routers\health.py
+# hypothesis_version: 6.148.7
+
+[3.0, 5.0, 200, 503, 1000, '/health', '/ready', '1.0.3', 'SELECT 1', 'degraded', 'environment', 'error', 'health', 'healthy', 'latency_ms', 'litellm', 'minio', 'not_configured', 'not_ready', 'ok', 'ollama', 'postgres', 'qdrant', 'ready', 'redis', 'services', 'simulation_mode', 'status', 'timestamp', 'version']

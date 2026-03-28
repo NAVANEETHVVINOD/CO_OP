@@ -1,7 +1,7 @@
 import logging
 import time
 from typing import Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
@@ -126,7 +126,7 @@ async def check_health():
     
     return {
         "status": overall_status,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": "1.0.3",
         "environment": settings.ENVIRONMENT,
         "simulation_mode": settings.COOP_SIMULATION_MODE,
@@ -159,7 +159,7 @@ async def readiness_check():
         status_code=status_code,
         content={
             "status": "ready" if core_ok else "not_ready",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "services": {
                 "postgres": pg,
                 "redis": rd,

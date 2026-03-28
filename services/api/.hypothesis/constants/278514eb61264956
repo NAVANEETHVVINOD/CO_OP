@@ -1,0 +1,4 @@
+# file: F:\kannan\projects\CO_OS\services\api\app\services\indexer.py
+# hypothesis_version: 6.148.7
+
+['chunk_index', 'dense', 'document_id', 'indices', 'sparse', 'tenant_id', 'text', 'values']
