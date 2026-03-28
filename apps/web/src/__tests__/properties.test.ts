@@ -5,7 +5,7 @@
  * These tests use fast-check to validate configuration properties across the frontend codebase.
  */
 import fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 
