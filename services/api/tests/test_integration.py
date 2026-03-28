@@ -306,10 +306,8 @@ async def test_rag_pipeline_integration(async_client: AsyncClient, db_session: A
         chunk = DocumentChunk(
             id=uuid.uuid4(),
             document_id=doc.id,
-            tenant_id=user.tenant_id,
             chunk_index=idx,
-            content=chunk_text,
-            embedding=[0.1] * 384  # Mock embedding
+            text=chunk_text
         )
         db_session.add(chunk)
     

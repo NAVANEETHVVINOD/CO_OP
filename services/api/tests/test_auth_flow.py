@@ -18,7 +18,6 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import Tenant, User
 from app.core.security import get_password_hash, ALGORITHM
-from app.config import get_settings
 
 
 @pytest.mark.asyncio
@@ -33,7 +32,6 @@ async def test_complete_auth_flow(async_client: AsyncClient, db_session: AsyncSe
     4. User refreshes tokens using refresh_token
     5. New tokens work for protected endpoints
     """
-    settings = get_settings()
     
     # Setup: Create test user
     tenant = Tenant(name="auth_flow_tenant")
@@ -180,7 +178,6 @@ async def test_jwt_token_signature_validation(async_client: AsyncClient, db_sess
     - Tokens signed with wrong secret are rejected
     - Tokens with tampered payload are rejected
     """
-    settings = get_settings()
     
     # Create test user
     tenant = Tenant(name="jwt_test_tenant")
