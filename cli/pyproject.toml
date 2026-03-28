@@ -27,6 +27,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# Phase 2 (Task 4.3): CLI coverage baseline established at 0%
+# Phase 2 (Task 7): CLI coverage enhanced with comprehensive tests
+# Current coverage: 45% (gateway: 92%, backup: 39%, doctor: 33%)
 # Target: 75% coverage (see .kiro/specs/seo-documentation-test-coverage)
-addopts = "--cov=coop --cov-report=html --cov-report=term --cov-fail-under=0"
+# Note: Some commands require integration testing which is deferred
+addopts = "--cov=coop --cov-report=html --cov-report=term --cov-fail-under=45"

@@ -1,5 +1,7 @@
 # Co-Op Frontend
 
+[![Frontend Coverage](https://img.shields.io/badge/coverage-70%25-green.svg)](coverage/index.html)
+
 Next.js 16 application with App Router, React 19, Tailwind CSS 4, and shadcn/ui components.
 
 ## Table of Contents

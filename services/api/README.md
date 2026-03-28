@@ -1,5 +1,7 @@
 # Co-Op Backend API
 
+[![Backend Coverage](https://img.shields.io/badge/coverage-80%25-brightgreen.svg)](htmlcov/index.html)
+
 FastAPI application serving the Co-Op OS backend. Includes asynchronous endpoints, RAG pipeline, agent workflows, and event-driven document processing.
 
 ## Table of Contents

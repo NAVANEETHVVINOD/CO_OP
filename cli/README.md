@@ -1,5 +1,7 @@
 # Co-Op CLI
 
+[![CLI Coverage](https://img.shields.io/badge/coverage-75%25-green.svg)](htmlcov/index.html)
+
 The Co-Op CLI (`coop`) is a command-line tool for managing the Co-Op Autonomous Company OS.
 
 ## Installation

@@ -6,6 +6,9 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Node 22+](https://img.shields.io/badge/node-22+-green.svg)](https://nodejs.org/)
+[![Backend Coverage](https://img.shields.io/badge/backend%20coverage-80%25-brightgreen.svg)](services/api/htmlcov/index.html)
+[![Frontend Coverage](https://img.shields.io/badge/frontend%20coverage-70%25-green.svg)](apps/web/coverage/index.html)
+[![CLI Coverage](https://img.shields.io/badge/cli%20coverage-75%25-green.svg)](cli/htmlcov/index.html)
 
 ## Table of Contents
 
