@@ -25,6 +25,11 @@ coop = "coop.main:app"
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["coop*"]
+exclude = ["tests*", "backups*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 # Phase 2 (Task 7): CLI coverage enhanced with comprehensive tests

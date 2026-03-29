@@ -56,6 +56,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: Build web app
+        run: |
+          cd apps/web
+          pnpm install
+          pnpm build
       - name: install desktop dependencies
         run: |
           cd apps/desktop
@@ -64,13 +69,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__ # the action will replace this with actual version
+          tagName: v__VERSION__
           releaseName: "Co-Op v__VERSION__"
           releaseBody: "Automated release from GitHub Actions."
           releaseDraft: true
           prerelease: false
-          args: ""
-          manifestPath: apps/desktop/src-tauri/Cargo.toml
+          projectPath: apps/desktop
 
   create-release:
     name: Finalize GitHub Release
