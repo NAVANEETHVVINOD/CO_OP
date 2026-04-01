@@ -44,7 +44,7 @@ jobs:
         run: ruff check .
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 9.12.0
 
@@ -132,7 +132,7 @@ jobs:
         run: pip-audit --skip-editable --ignore-vuln CVE-2026-4539
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 9.12.0
 

@@ -46,7 +46,7 @@ jobs:
           node-version: 20
       - name: install pnpm
         # pnpm/action-setup @ v4.0.0
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 9.12.0
       - name: install Rust stable
